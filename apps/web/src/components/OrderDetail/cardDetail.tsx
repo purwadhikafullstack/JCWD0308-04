@@ -1,8 +1,9 @@
 'use client';
 import { Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { formatToIDR } from '@/lib/utils';
 
 export default function CardDetail({ products }: CardDetailProps) {
   const product = products.length > 0 ? products[0] : null;
@@ -30,9 +31,9 @@ export default function CardDetail({ products }: CardDetailProps) {
           <ul className="grid gap-3">
             <li className="flex items-center justify-between">
               <span className="text-muted-foreground">
-                {product?.name} x <span>2</span>
+                {product?.name} x <span></span>
               </span>
-              <span>$250.00</span>
+              <span>{formatToIDR(product?.price!)}</span>
             </li>
             <li className="flex items-center justify-between">
               <span className="text-muted-foreground">

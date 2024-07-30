@@ -1,3 +1,4 @@
+
 import Product from '@/components/OrderDetail/product';
 import CardDetail from '@/components/OrderDetail/cardDetail';
 import { fetchProducts } from '@/lib/fetchProducts';
