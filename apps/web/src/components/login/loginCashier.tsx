@@ -38,7 +38,7 @@ export default function LoginCashier() {
         sameSite: 'Strict'
       })
       alert("Login Success")
-      router.push('/orders')
+      router.push('/shift')
     } catch (error) {
       console.error("Login error:", error);
     }

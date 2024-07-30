@@ -1,7 +1,7 @@
 'use client'
 import Image from "next/image"
 import Link from "next/link"
-import { Clock, Home, LineChart, Package, PanelLeft, Search, Settings, ShoppingCart, Users2,} from "lucide-react"
+import { Clock, Home, LineChart, Package, PanelLeft, Search, Settings, ShoppingCart, Users2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
@@ -9,92 +9,103 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useRouter } from "next/navigation"
 import Cookies from "js-cookie"
+import { useEffect, useState } from "react"
 
 export function Navbar() {
   const router = useRouter()
-  const handleLogout = ()=> {
+  const [isAuth, setIsAuth] = useState(false)
+  const [isLoaded, setIsLoaded] = useState(false)
+
+  useEffect(() => {
+    const token = Cookies.get('token')
+    setIsAuth(!!token)
+    setIsLoaded(true)
+  }, [])
+  useEffect(() => {
+    if (isLoaded && !isAuth) {
+      router.push('/')
+    }
+  }, [isLoaded, isAuth, router])
+
+  const handleLogout = () => {
     Cookies.remove('token')
+    setIsAuth(false)
     router.push('/')
   }
+  if (!isLoaded) return null // Avoid rendering until the auth status is confirmed
+  if (!isAuth) return null
+
   return (
-    <div> 
+    <div>
       <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
         <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
           <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link href="/"
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8">
-                <Home className="h-5 w-5" />
-                <span className="sr-only">Home</span>
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent side="right">Home</TooltipContent>
-          </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link href="/" className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8">
+                  <Home className="h-5 w-5" />
+                  <span className="sr-only">Home</span>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent side="right">Home</TooltipContent>
+            </Tooltip>
           </TooltipProvider>
           <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link href="/orders"
-                className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-accent-foreground transition-colors hover:text-foreground md:h-8 md:w-8">
-                <ShoppingCart className="h-5 w-5" />
-                <span className="sr-only">Orders</span>
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent side="right">Orders</TooltipContent>
-          </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link href="/orders" className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-accent-foreground transition-colors hover:text-foreground md:h-8 md:w-8">
+                  <ShoppingCart className="h-5 w-5" />
+                  <span className="sr-only">Orders</span>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent side="right">Orders</TooltipContent>
+            </Tooltip>
           </TooltipProvider>
           <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link href="#"
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8">
-                <Package className="h-5 w-5" />
-                <span className="sr-only">Products</span>
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent side="right">Products</TooltipContent>
-          </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link href="#" className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8">
+                  <Package className="h-5 w-5" />
+                  <span className="sr-only">Products</span>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent side="right">Products</TooltipContent>
+            </Tooltip>
           </TooltipProvider>
           <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link href="#"
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8">
-                <Users2 className="h-5 w-5" />
-                <span className="sr-only">Customers</span>
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent side="right">Customers</TooltipContent>
-          </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link href="#" className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8">
+                  <Users2 className="h-5 w-5" />
+                  <span className="sr-only">Customers</span>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent side="right">Customers</TooltipContent>
+            </Tooltip>
           </TooltipProvider>
           <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link
-                href="/shift"
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8">
-                <Clock className="h-5 w-5" />
-                <span className="sr-only">Shift</span>
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent side="right">Shift</TooltipContent>
-          </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link href="/shift" className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8">
+                  <Clock className="h-5 w-5" />
+                  <span className="sr-only">Shift</span>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent side="right">Shift</TooltipContent>
+            </Tooltip>
           </TooltipProvider>
         </nav>
         <nav className="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
-            <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link
-                href="#"
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8">
-                <Settings className="h-5 w-5" />
-                <span className="sr-only">Settings</span>
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent side="right">Settings</TooltipContent>
-          </Tooltip>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link href="#" className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8">
+                  <Settings className="h-5 w-5" />
+                  <span className="sr-only">Settings</span>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent side="right">Settings</TooltipContent>
+            </Tooltip>
           </TooltipProvider>
         </nav>
       </aside>
@@ -146,7 +157,7 @@ export function Navbar() {
                 variant="outline"
                 size="icon"
                 className="overflow-hidden rounded-full">
-                <Image src="/placeholder-user.jpg" width={36} height={36} alt="Avatar "className="overflow-hidden rounded-full"/>
+                <Image src="/images/photo.jpeg" width={36} height={36} alt="Avatar" className="overflow-hidden rounded-full" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">

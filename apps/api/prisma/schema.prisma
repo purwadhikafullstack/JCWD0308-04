@@ -43,7 +43,7 @@ model Shift {
   id          Int           @id @default(autoincrement())
   cashierId   Int
   startAmount Float
-  endAmount   Float
+  endAmount   Float?
   endTime     DateTime?
   cashier     Cashier       @relation(fields: [cashierId], references: [id])
   Transaction Transaction[]

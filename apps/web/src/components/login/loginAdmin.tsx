@@ -12,7 +12,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useState } from "react"
 import Cookies from 'js-cookie'
-import { useToast } from "../ui/use-toast"
 import { useRouter } from "next/navigation"
 
 export default function LoginAdmin() {
@@ -41,6 +40,7 @@ export default function LoginAdmin() {
                 sameSite: 'Strict'
             })
             router.push("/products")
+            alert('Login Success')
         } catch (error: any) {
             setError(error.message || "An error occurred")
         }
