@@ -10,12 +10,70 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Sample {
+model Admin {
   id        Int      @id @default(autoincrement())
-  name      String
-  code      String   @unique
+  email     String   @unique
+  password  String
+  role      String   @default("admin")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
 
-  @@map("samples") // if you want to use snake_case format
+model Cashier {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  role      String   @default("cashier")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Shift     Shift[]
+}
+
+model Product {
+  id                 Int                  @id @default(autoincrement())
+  name               String
+  price              Float
+  stock              Int
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  TransactionProduct TransactionProduct[]
+}
+
+model Shift {
+  id          Int           @id @default(autoincrement())
+  cashierId   Int
+  startAmount Float
+  endAmount   Float?
+  endTime     DateTime?
+  cashier     Cashier       @relation(fields: [cashierId], references: [id])
+  Transaction Transaction[]
+}
+
+model Transaction {
+  id                 Int                  @id @default(autoincrement())
+  shiftID            Int
+  totalPrice         Float
+  createdAt          DateTime             @default(now())
+  shift              Shift                @relation(fields: [shiftID], references: [id])
+  Payment            Payment[]
+  TransactionProduct TransactionProduct[]
+}
+
+model Payment {
+  id            Int         @id @default(autoincrement())
+  transactionId Int
+  method        String
+  amount        Float
+  change        Float?
+  cardNumber    String?
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+}
+
+model TransactionProduct {
+  id            Int         @id @default(autoincrement())
+  transactionId Int
+  productId     Int
+  quantity      Int
+  trasaction    Transaction @relation(fields: [transactionId], references: [id])
+  product       Product     @relation(fields: [productId], references: [id])
 }
