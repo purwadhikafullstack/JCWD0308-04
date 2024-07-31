@@ -15,12 +15,22 @@ export function Navbar() {
   const router = useRouter()
   const [isAuth, setIsAuth] = useState(false)
   const [isLoaded, setIsLoaded] = useState(false)
+  const [userRole, setUserRole] = useState<string | null>(null)
 
   useEffect(() => {
+    // console.log('Cookies', document.cookie);
     const token = Cookies.get('token')
-    setIsAuth(!!token)
+    const role = Cookies.get('role') || null
+    // console.log(role);
+    if (token) {
+      setIsAuth(true)
+      setUserRole(role)
+    } else {
+      setIsAuth(false)
+    }
     setIsLoaded(true)
   }, [])
+
   useEffect(() => {
     if (isLoaded && !isAuth) {
       router.push('/')
@@ -29,11 +39,12 @@ export function Navbar() {
 
   const handleLogout = () => {
     Cookies.remove('token')
+    Cookies.remove('role')
     setIsAuth(false)
     router.push('/')
   }
-  if (!isLoaded) return null // Avoid rendering until the auth status is confirmed
-  if (!isAuth) return null
+
+  if (!isLoaded || !isAuth) return null // Avoid rendering until the auth status is confirmed
 
   return (
     <div>
@@ -50,6 +61,9 @@ export function Navbar() {
               <TooltipContent side="right">Home</TooltipContent>
             </Tooltip>
           </TooltipProvider>
+
+          {/* {userRole === 'cashier' && ( */}
+          <>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -62,51 +76,46 @@ export function Navbar() {
             </Tooltip>
           </TooltipProvider>
           <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link href="#" className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8">
-                  <Package className="h-5 w-5" />
-                  <span className="sr-only">Products</span>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent side="right">Products</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link href="#" className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8">
-                  <Users2 className="h-5 w-5" />
-                  <span className="sr-only">Customers</span>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent side="right">Customers</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link href="/shift" className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8">
-                  <Clock className="h-5 w-5" />
-                  <span className="sr-only">Shift</span>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent side="right">Shift</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </nav>
-        <nav className="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link href="#" className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8">
-                  <Settings className="h-5 w-5" />
-                  <span className="sr-only">Settings</span>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent side="right">Settings</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link href="/shift" className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8">
+                    <Clock className="h-5 w-5" />
+                    <span className="sr-only">Shift</span>
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent side="right">Shift</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            </>
+          {/* )} */}
+
+          {/* {userRole === 'admin' && ( */}
+            <>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link href="/admin/productManagements" className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8">
+                      <Package className="h-5 w-5" />
+                      <span className="sr-only">Products Management</span>
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">Products Management</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link href="/admin/cashierManagements" className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8">
+                      <Users2 className="h-5 w-5" />
+                      <span className="sr-only">Cashier Management</span>
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">Cashier Management</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </>
+          {/* )} */}
+
         </nav>
       </aside>
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
@@ -128,14 +137,25 @@ export function Navbar() {
                   <ShoppingCart className="h-5 w-5" />
                   Orders
                 </Link>
-                <Link href="#" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
-                  <Package className="h-5 w-5" />
-                  Products
-                </Link>
-                <Link href="#" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
-                  <Users2 className="h-5 w-5" />
-                  Customers
-                </Link>
+                {/* Conditionally render sidebar items based on role */}
+                {/* {userRole === 'admin' && ( */}
+                  <>
+                    <Link href="#" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
+                      <Package className="h-5 w-5" />
+                      Products
+                    </Link>
+                    <Link href="#" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
+                      <Users2 className="h-5 w-5" />
+                      Customers
+                    </Link>
+                  </>
+                {/* )} */}
+                {/* {userRole === 'cashier' && ( */}
+                  <Link href="#" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
+                    <Clock className="h-5 w-5" />
+                    Shift
+                  </Link>
+                {/* )} */}
                 <Link href="#" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
                   <LineChart className="h-5 w-5" />
                   Settings

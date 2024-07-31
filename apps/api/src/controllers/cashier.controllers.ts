@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
 import { sign } from "jsonwebtoken";
+import cookie from 'cookie'
 
 const prisma = new PrismaClient()
 export class CashierControllers {
@@ -16,16 +17,22 @@ export class CashierControllers {
             if(password !== cashier.password) {
                 return res.status(401).json({ error: 'Invalid Password' });
             }
-            const payload = {id: cashier.id, email: cashier.email}
+            const payload = {id: cashier.id, email: cashier.email, role: cashier.role}
             const token = sign(payload, process.env.KEY_JWT!, {expiresIn: '1h'})
-            res.status(200).json({token})
+            const role  = cashier.role
+
+            res.status(200).json({token, role})
         } catch (error) {
             res.status(500).json({error: 'Internal Server Error'})
         }
     }
     async StartShift(req: Request, res: Response) {
         try {
-            const { cashierId, startAmount} = req.body
+            const { startAmount, cashierId} = req.body
+            // const cashierId = (req.user as User )?.id
+            // if(!cashierId) {
+            //     return res.status(400).json({error: 'Cashier ID is missing' })
+            // }
             const shift = await prisma.shift.create({
                 data: {
                     cashierId,
@@ -132,5 +139,4 @@ export class CashierControllers {
             res.status(500).json({ error: 'Internal Server Error' });
         }
     }
-
 }
