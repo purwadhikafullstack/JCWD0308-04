@@ -1,57 +1,47 @@
+'use client'
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import Cookies from "js-cookie"
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { TokenProps } from "@/types/product"
+import { FormEvent, useState } from "react"
 
-export default function LoginCashier() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [loading, setLoading] = useState(false)
-  const router = useRouter()
-  const handleLogin = async (e: React.FormEvent)=>{
-    e.preventDefault()
-    setLoading(true)
+export function DialogCreateCashier({token}: TokenProps ) {
+const [email, setEmail] = useState('')
+const [password, setPassword] = useState('')
+const [isOpen, setIsOpen] = useState(false)
+
+const handleSubmit = async (event: FormEvent) =>{
+    event.preventDefault()
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}cashier/login`, {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({email, password})
-      })
-      if(!response.ok){
-        const errorData = await response.json()
-        throw new Error(errorData.error || "Login Failed")
-    }
-    const expires = new Date()
-    expires.setHours(expires.getHours() + 1)
-
-    const {token} = await response.json()
-    Cookies.set("token", token, {
-        expires: expires,
-        sameSite: 'Strict'
-      })
-      router.push('/activity')
-      alert("Login Success")
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}admin/createCashier`, {
+            method: 'POST',
+            headers: {
+                'Content-Type' : 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({email,password})
+        })
+        if (response.ok) {
+            throw('Cashier Created')
+        }
     } catch (error) {
-      console.error("Login error:", error);
+        throw(error)
     }
-    setLoading(false)
-  }
+}
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">Login as Cashier</Button>
+        <Button variant="outline">Add New Cashier</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Login as Cashier</DialogTitle>
+          <DialogTitle>Add New Cashier</DialogTitle>
           <DialogDescription>
             Make changes to your profile here. Click save when youre done.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleSubmit} className="grid gap-4 py-4">
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="email" className="text-right">
@@ -60,10 +50,9 @@ export default function LoginCashier() {
             <Input
               id="email"
               type="email"
-              placeholder="blabla@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
+              defaultValue="P"
               className="col-span-3"
             />
           </div>
@@ -76,13 +65,13 @@ export default function LoginCashier() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
+              defaultValue=""
               className="col-span-3"
             />
           </div>
         </div>
         <DialogFooter>
-          <Button type="submit" disabled={loading}>Log In</Button>
+          <Button type="submit">Create</Button>
         </DialogFooter>
         </form>
       </DialogContent>

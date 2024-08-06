@@ -4,9 +4,29 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { formatToIDR } from '@/lib/utils';
+import { Input } from '../ui/input';
+import { useState } from 'react';
+import { CardDetailProps } from '@/types/product';
 
-export default function CardDetail({ products }: CardDetailProps) {
-  const product = products.length > 0 ? products[0] : null;
+export default function CardDetail({ selectedProducts }: CardDetailProps) {
+  const [quantities, setQuantities] = useState<{ [key: number]: number }>(
+    () =>
+      selectedProducts.reduce((acc, product) => {
+        acc[product.id] = 1; // default qty
+        return acc;
+      }, {} as { [key: number]: number })
+  );
+  const handleQuantityChange = (productId: number, quantity: number) => {
+    const product = selectedProducts.find(p => p.id === productId);
+    if (product) {
+      setQuantities((prevQuantities) => ({
+        ...prevQuantities,
+        [productId]: Math.min(Math.max(quantity, 1), product.stock) // Ensure quantity is between 1 and stock
+      }));
+    }
+  };
+  const totalAmount = selectedProducts.reduce(
+    (total, product) => total + product.price * quantities[product.id],0);
 
   return (
     <Card className="overflow-hidden">
@@ -25,78 +45,43 @@ export default function CardDetail({ products }: CardDetailProps) {
           </CardTitle>
         </div>
       </CardHeader>
-      <CardContent className="p-6 text-sm">
+      <CardContent className="p-6 text-sm gap-5">
         <div className="grid gap-3">
           <div className="font-semibold">Order Details</div>
           <ul className="grid gap-3">
-            <li className="flex items-center justify-between">
-              <span className="text-muted-foreground">
-                {product?.name} x <span></span>
-              </span>
-              <span>{formatToIDR(product?.price!)}</span>
-            </li>
-            <li className="flex items-center justify-between">
-              <span className="text-muted-foreground">
-                Aqua Filters x <span>1</span>
-              </span>
-              <span>$49.00</span>
-            </li>
+            {selectedProducts.map((product) => (
+              <li key={product.id} className="flex items-center justify-between">
+                <span className="text-muted-foreground">
+                  {product.name}  
+                  <span>
+                    <Input id={`quantity-${product.id}`}
+                      type="number"
+                      min="1"
+                      value={quantities[product.id]}
+                      onChange={(e) =>
+                        handleQuantityChange(product.id, parseInt(e.target.value) || 1)}/>
+                  </span>
+                </span>
+                <span>{formatToIDR(product.price * quantities[product.id])}</span>
+              </li>
+            ))}
           </ul>
           <Separator className="my-2" />
           <ul className="grid gap-3">
-            <li className="flex items-center justify-between">
-              <span className="text-muted-foreground">Subtotal</span>
-              <span>$299.00</span>
-            </li>
-            <li className="flex items-center justify-between">
-              <span className="text-muted-foreground">Shipping</span>
-              <span>$5.00</span>
-            </li>
-            <li className="flex items-center justify-between">
-              <span className="text-muted-foreground">Tax</span>
-              <span>$25.00</span>
-            </li>
             <li className="flex items-center justify-between font-semibold">
               <span className="text-muted-foreground">Total</span>
-              <span>$329.00</span>
+              <span>{formatToIDR(totalAmount)}</span>
             </li>
           </ul>
         </div>
         <Separator className="my-4" />
-        <div className="grid grid-cols-2 gap-4">
-          <div className="grid gap-3">
-            <div className="font-semibold">Shipping Information</div>
-            <address className="grid gap-0.5 not-italic text-muted-foreground">
-              <span>Liam Johnson</span>
-              <span>1234 Main St.</span>
-              <span>Anytown, CA 12345</span>
-            </address>
-          </div>
-          <div className="grid auto-rows-max gap-3">
-            <div className="font-semibold">Billing Information</div>
-            <div className="text-muted-foreground">
-              Same as shipping address
-            </div>
-          </div>
-        </div>
-        <Separator className="my-4" />
         <div className="grid gap-3">
-          <div className="font-semibold">Customer Information</div>
+          <div className="font-semibold">Cashier Information</div>
           <dl className="grid gap-3">
-            <div className="flex items-center justify-between">
-              <dt className="text-muted-foreground">Customer</dt>
-              <dd>Liam Johnson</dd>
-            </div>
             <div className="flex items-center justify-between">
               <dt className="text-muted-foreground">Email</dt>
               <dd>
-                <a href="mailto:">liam@acme.com</a>
-              </dd>
-            </div>
-            <div className="flex items-center justify-between">
-              <dt className="text-muted-foreground">Phone</dt>
-              <dd>
-                <a href="tel:">+1 (555) 123-4567</a>
+                <a href="mailto:liam@acme.com">liam@acme.com</a>
               </dd>
             </div>
           </dl>

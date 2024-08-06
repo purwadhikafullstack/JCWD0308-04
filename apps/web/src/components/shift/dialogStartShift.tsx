@@ -2,8 +2,31 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import Cookies from "js-cookie"
+import { useState } from "react"
 
 export function DialogStartShift() {
+  const [startAmount, setStartAmount] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const handleSubmit = async ()=> {
+    const token = Cookies.get('token')
+    if (!startAmount) return
+    setIsSubmitting(true)
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}cashier/start-shift`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type':'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({startAmount : +startAmount})
+      })
+    } catch (error) {
+      console.error("Error starting shift:", error)
+    }
+    setIsSubmitting(false)
+  }
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -23,13 +46,16 @@ export function DialogStartShift() {
             </Label>
             <Input
               id="name"
-              defaultValue="Cash"
+              value={startAmount}
+              onChange={(e) => setStartAmount(e.target.value)}
               className="col-span-3"
             />
           </div>
         </div>
         <DialogFooter>
-          <Button type="submit">Start Shift</Button>
+          <Button type="button" onClick={handleSubmit} disabled={isSubmitting} >
+            {isSubmitting ? 'Submitting' : 'Start Shift'}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
