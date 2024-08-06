@@ -1,9 +1,9 @@
 'use client'
 import Image from "next/image"
 import Link from "next/link"
-import { Clock, Home, LineChart, Package, PanelLeft, Search, Settings, ShoppingCart, Users2 } from "lucide-react"
+import { BookKey, Clock, Home, LineChart, Package, PanelLeft, Search, ShoppingCart, Users2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
@@ -61,7 +61,6 @@ export function Navbar() {
               <TooltipContent side="right">Home</TooltipContent>
             </Tooltip>
           </TooltipProvider>
-
           {/* {userRole === 'cashier' && ( */}
           <>
           <TooltipProvider>
@@ -78,17 +77,17 @@ export function Navbar() {
           <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Link href="/shift" className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8">
+                  <Link href="/activity" className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8">
                     <Clock className="h-5 w-5" />
-                    <span className="sr-only">Shift</span>
+                    <span className="sr-only">Activity</span>
                   </Link>
                 </TooltipTrigger>
-                <TooltipContent side="right">Shift</TooltipContent>
+                <TooltipContent side="right">Activity</TooltipContent>
               </Tooltip>
             </TooltipProvider>
             </>
           {/* )} */}
-
+        
           {/* {userRole === 'admin' && ( */}
             <>
               <TooltipProvider>
@@ -113,6 +112,17 @@ export function Navbar() {
                   <TooltipContent side="right">Cashier Management</TooltipContent>
                 </Tooltip>
               </TooltipProvider>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link href="" className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8">
+                      <BookKey  className="h-5 w-5" />
+                      <span className="sr-only">Recent Shift</span>
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">Recent Shift</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </>
           {/* )} */}
 
@@ -135,7 +145,7 @@ export function Navbar() {
                 </Link>
                 <Link href="#" className="flex items-center gap-4 px-2.5 text-foreground">
                   <ShoppingCart className="h-5 w-5" />
-                  Orders
+                  Point Of Sales
                 </Link>
                 {/* Conditionally render sidebar items based on role */}
                 {/* {userRole === 'admin' && ( */}
@@ -153,7 +163,7 @@ export function Navbar() {
                 {/* {userRole === 'cashier' && ( */}
                   <Link href="#" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
                     <Clock className="h-5 w-5" />
-                    Shift
+                    Current Shift
                   </Link>
                 {/* )} */}
                 <Link href="#" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
@@ -181,10 +191,7 @@ export function Navbar() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuItem>Support</DropdownMenuItem>
+              {/* <DropdownMenuLabel>My Account</DropdownMenuLabel> */}
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
             </DropdownMenuContent>

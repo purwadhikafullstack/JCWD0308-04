@@ -8,18 +8,18 @@ import { useState } from "react"
 export function DialogStartShift() {
   const [startAmount, setStartAmount] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-
   const handleSubmit = async ()=> {
     const token = Cookies.get('token')
     if (!startAmount) return
     setIsSubmitting(true)
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}cashier/start-shift`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}cashier/start-shift`, {
         method: 'POST',
         headers: { 
-          'Content-Type':'applications/json',
+          'Content-Type':'application/json',
           'Authorization': `Bearer ${token}`
-        }
+        },
+        body: JSON.stringify({startAmount : +startAmount})
       })
     } catch (error) {
       console.error("Error starting shift:", error)

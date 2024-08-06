@@ -1,7 +1,8 @@
-import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
-import { sign } from "jsonwebtoken";
-import cookie from 'cookie'
+import { sign, verify } from "jsonwebtoken";
+import { User } from "@/custom";
+import { PrismaClient } from "@prisma/client";
+import { compare } from "bcrypt";
 
 const prisma = new PrismaClient()
 export class CashierControllers {
@@ -14,7 +15,8 @@ export class CashierControllers {
             if(!cashier) {
                 return res.status(404).json({error: 'Cashier Not Found'})
             }
-            if(password !== cashier.password) {
+            const isValid = await compare(password, cashier.password)
+            if(!isValid) {
                 return res.status(401).json({ error: 'Invalid Password' });
             }
             const payload = {id: cashier.id, email: cashier.email, role: cashier.role}
@@ -28,11 +30,12 @@ export class CashierControllers {
     }
     async StartShift(req: Request, res: Response) {
         try {
-            const { startAmount, cashierId} = req.body
-            // const cashierId = (req.user as User )?.id
-            // if(!cashierId) {
-            //     return res.status(400).json({error: 'Cashier ID is missing' })
-            // }
+            const { startAmount } = req.body
+            console.log(req.body)
+            const cashierId = (req.user as User )?.id
+            if(!cashierId) {
+                return res.status(400).json({error: 'Cashier ID is missing' })
+            }
             const shift = await prisma.shift.create({
                 data: {
                     cashierId,
@@ -40,25 +43,83 @@ export class CashierControllers {
                     endAmount: null
                 }
             })
+            
             res.status(201).json(shift)
         } catch (error) {
             res.status(500).json({error: 'Internal Server Error'})
         }
     }
+    async GetShiftStatus(req: Request, res: Response) {
+    const cashierId = req.user.id;
+    try {
+      const shift = await prisma.shift.findFirst({
+        where: {
+          cashierId,
+          endTime: null,
+        },
+        orderBy: {
+          startTime: 'desc',
+        },
+      });
+  
+      res.status(200).json({ shiftStarted: !!shift });
+    } catch (error) {
+      console.error('Error getting shift status:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+    }
+    async GetCurrentShift(req: Request, res: Response) {
+        try {
+          const token = req.headers.authorization?.replace('Bearer ', '');
+          if (!token) return res.status(401).json({ error: 'Unauthorized' });
+          const verifiedUser = verify(token, process.env.KEY_JWT!) as User;
+          const shift = await prisma.shift.findFirst({
+            where: {
+              cashierId: verifiedUser.id,
+              endTime: null,
+            },
+          });
+          if (!shift) {
+            return res.status(404).json({ error: 'No active shift found' });
+          }
+          res.status(200).json(shift);
+        } catch (error) {
+          res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }  
     async EndShift(req: Request, res: Response) {
         try {
-            const { shiftId, endAmount} = req.body
-            const shift = await prisma.shift.update({
-                where: { id: shiftId},
-                data: {
-                    endTime: new Date(),
-                    endAmount,
-                }
-            })
-            res.status(200).json(shift)
-        } catch (error) {
-            res.status(500).json({error: 'Internal Server Error'})
-        }
+            const { shiftId, endAmount } = req.body;
+            if (!shiftId) {
+              return res.status(400).json({ error: 'Shift ID is required' });
+            }
+            // Check if shift exists and is currently open
+            const shift = await prisma.shift.findUnique({
+              where: { id: shiftId },
+              select: {
+                id: true,
+                endTime: true,
+              },
+            });
+            if (!shift) {
+              return res.status(404).json({ error: 'Shift not found' });
+            }
+            if (shift.endTime) {
+              return res.status(400).json({ error: 'Shift already ended' });
+            }
+            // Update the shift
+            const updatedShift = await prisma.shift.update({
+              where: { id: shiftId },
+              data: {
+                endTime: new Date(),
+                endAmount,
+              },
+            });
+            res.status(200).json(updatedShift);
+          } catch (error) {
+            console.error('Error ending shift:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+          }
     }
     async RecordTransaction(req: Request, res: Response) {
         const { shiftId, products, paymentMethod, amountPaid, cardNumber} = req.body

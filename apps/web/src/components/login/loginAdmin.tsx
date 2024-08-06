@@ -1,13 +1,5 @@
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useState } from "react"
@@ -34,12 +26,15 @@ export default function LoginAdmin() {
                 const errorData = await response.json()
                 throw new Error(errorData.error || "Login Failed")
             }
+            const expires = new Date()
+            expires.setHours(expires.getHours() + 1)
+
             const {token} = await response.json()
             Cookies.set("token", token, {
-                expires: 1,
+                expires: expires,
                 sameSite: 'Strict'
             })
-            router.push("/products")
+            router.push("/admin/productManagements")
             alert('Login Success')
         } catch (error: any) {
             setError(error.message || "An error occurred")

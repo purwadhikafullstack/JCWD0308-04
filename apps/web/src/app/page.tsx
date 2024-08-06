@@ -18,8 +18,7 @@ export default function Home() {
             <h1 className="text-3xl font-extrabold sm:text-5xl">
               Corner.
               <strong className="font-extrabold text-red-700 sm:block">
-                {' '}
-                Point Of Sales.{' '}
+                Point Of Sales.
               </strong>
             </h1>
             <p className="mt-4 sm:text-xl/relaxed">

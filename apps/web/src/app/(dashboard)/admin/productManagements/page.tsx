@@ -1,29 +1,115 @@
-'use client';
-export default function Products() {
+'use client'
+import { useEffect, useState } from "react"
+import Image from "next/image"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle,} from "@/components/ui/card"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "@/components/ui/table"
+import { formatToIDR } from "@/lib/utils"
+import { DialogEditProducts } from "@/components/productManagements/dialogEditProduct"
+import { deleteProduct, getProduct } from "@/lib/fetch"
+import { Product, TokenProps } from "@/types/product"
+import { Button } from "@/components/ui/button"
+import { DialogCreateProduct } from "@/components/productManagements/dialogCreateProduct"
+import Cookies from "js-cookie"
+
+export default function ProductManagements() {
+  const [products, setProducts] = useState<Product[]>([])
+  const token = Cookies.get('token')!
+
+  useEffect(() => {
+    const loadProduct = async () => {
+      try {
+        const data = await getProduct(token) 
+        setProducts(data)
+      } catch (error) {
+        console.error("Error loading products", error)
+      }
+    }
+    loadProduct()
+  }, [token])
+
+  const handleDelete = async (productId : number) => {
+    try {
+      const success = await deleteProduct(productId, token)
+      if(success) {
+        setProducts(products.filter(product => product.id != productId))
+      }
+    } catch (error) {
+      console.error('Error deleting product', error)
+    }
+  }
+
+  const handleProductUpdated = async () => {
+    try {
+      const data = await getProduct(token)
+      setProducts(data)
+    } catch (error) {
+      console.error("Error refreshing products", error)
+    }
+  }
+
   return (
-    <div>
-      Lorem ipsum dolor sit amet consectetur adipisicing elit. Soluta provident
-      amet ratione optio debitis, id consequatur expedita laudantium laboriosam
-      consectetur fugiat, in earum assumenda, eius rem itaque! Reprehenderit rem
-      voluptatum debitis laudantium. Expedita similique aspernatur cumque beatae
-      deserunt eum, excepturi placeat quas mollitia quisquam cum aperiam omnis
-      autem voluptates ducimus sunt qui eos nobis facilis culpa? Qui mollitia
-      odio iusto quos ipsam ullam? Magni, obcaecati consequatur accusantium est
-      temporibus accusamus ab magnam? Harum minus quod magni alias cumque sed
-      sapiente exercitationem magnam voluptas ipsam, molestias doloremque illum
-      eos quae temporibus tenetur debitis sit quos nostrum excepturi libero,
-      quis adipisci? Aspernatur fugiat necessitatibus nisi, consectetur magnam
-      consequuntur voluptatibus odio sit expedita quisquam alias dignissimos
-      veniam vero voluptate? Assumenda officiis eum distinctio iste! Sed ratione
-      earum iusto aperiam dignissimos laboriosam voluptates doloremque
-      consequatur, incidunt fuga, harum aliquam tempora iste omnis! Laboriosam
-      commodi, atque consequatur rerum maxime veritatis unde amet itaque ratione
-      nobis, quaerat error! Enim excepturi voluptate, ipsam non at neque itaque
-      iste ab? Aperiam iste quasi, ex rerum perspiciatis quidem, commodi
-      asperiores at ea debitis illo quas dolore facilis minima eius id velit
-      mollitia nam deleniti illum facere veritatis dolores! Perspiciatis
-      sapiente natus pariatur neque labore, incidunt consectetur ex cupiditate
-      earum.
-    </div>
-  );
+    <Card className="pl-20">
+      <CardHeader>
+        <CardTitle>Products Managements</CardTitle>
+        <CardDescription>
+          Manage your products and view their sales performance.
+        </CardDescription>
+        <div className="flex justify-end">
+            <DialogCreateProduct token={token}/>
+        </div>  
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="hidden w-[100px] sm:table-cell">
+                <span className="sr-only">Image</span>
+              </TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>Stock</TableHead>
+              <TableHead className="hidden md:table-cell">Price</TableHead>
+              <TableHead></TableHead>
+              <TableHead>Edit</TableHead>
+              <TableHead>Delete</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {products.length > 0 ? (
+              products.map((product) => (
+                <TableRow key={product.id}>
+                  <TableCell className="hidden sm:table-cell">
+                    <Image
+                      alt="Product image"
+                      className="aspect-square rounded-md object-cover"
+                      height="64"
+                      src="/images/coffee.jpeg"
+                      width="64"
+                    />
+                  </TableCell>
+                  <TableCell className="font-medium">{product.name}</TableCell>
+                  <TableCell>{product.stock}</TableCell>
+                  <TableCell className="hidden md:table-cell">{formatToIDR(product.price)}</TableCell>
+                  <TableCell>
+                    -
+                  </TableCell>
+                  <TableCell>
+                    <DialogEditProducts product={product} token={token} onProductUpdated={handleProductUpdated}/>
+                  </TableCell>
+                  <TableCell className="tb gap-5">
+                    <Button onClick={() => handleDelete(product.id)}>Delete Product</Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center">
+                  No products available
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  )
 }
