@@ -1,12 +1,24 @@
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useState } from "react";
-import { updateCashier } from "@/lib/fetch";
-import { DialogEditCashierProps } from "@/types/product";
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useState } from 'react';
+import { updateCashier } from '@/lib/fetch';
+import { DialogEditCashierProps } from '@/types/types';
 
-export function DialogEditCashier({ cashier, token, onCashierUpdated }: DialogEditCashierProps) {
+export function DialogEditCashier({
+  cashier,
+  token,
+  onCashierUpdated,
+}: DialogEditCashierProps) {
   const [email, setEmail] = useState(cashier.email);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -14,10 +26,16 @@ export function DialogEditCashier({ cashier, token, onCashierUpdated }: DialogEd
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const updatedCashier = await updateCashier(cashier.id, email, currentPassword, newPassword, token);
+      const updatedCashier = await updateCashier(
+        cashier.id,
+        email,
+        currentPassword,
+        newPassword,
+        token,
+      );
       onCashierUpdated(updatedCashier);
     } catch (error) {
-      console.error("Error updating cashier", error);
+      console.error('Error updating cashier', error);
     }
   };
 

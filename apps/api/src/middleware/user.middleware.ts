@@ -9,12 +9,12 @@ export class UserMiddleware {
       if (!token) {
         return res.status(401).json({ error: 'Token is required' });
       }
-
       const verifiedUser = verify(token, process.env.KEY_JWT!) as User;
+
       req.user = verifiedUser;
       next();
     } catch (error) {
-      res.status(401).json({ error: 'Invalid or expired token' });
+      res.status(401).json({ error: error });
     }
   }
 }

@@ -1,10 +1,12 @@
+'use client'
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useState } from "react"
+import { useContext, useState } from "react"
 import Cookies from 'js-cookie'
 import { useRouter } from "next/navigation"
+import { UserContext } from "../context/UserContext"
 
 export default function LoginAdmin() {
     const [email, setEmail] = useState("")
@@ -12,24 +14,26 @@ export default function LoginAdmin() {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState("")
     const router = useRouter()
+    // const { setUser } = useContext(UserContext) ?? {}
+    
     const handleLogin = async (event: React.FormEvent) =>{
         event.preventDefault()
         setLoading(true)
-        setError("")
+        // setError("")
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}admin/login`,{
                 method: "POST",
                 headers: { "Content-Type": "application/json"},
                 body: JSON.stringify({email, password})
             })
-            if(!response.ok){
-                const errorData = await response.json()
-                throw new Error(errorData.error || "Login Failed")
+            // setUser?.(data)
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(errorData.error || 'Login Failed');
             }
             const expires = new Date()
-            expires.setHours(expires.getHours() + 1)
-
-            const {token} = await response.json()
+            expires.setHours(expires.getHours() + 6)
+            const { token } = await response.json();
             Cookies.set("token", token, {
                 expires: expires,
                 sameSite: 'Strict'
@@ -48,9 +52,9 @@ export default function LoginAdmin() {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Login as Admin</DialogTitle>
+          <DialogTitle>Admin</DialogTitle>
           <DialogDescription>
-            Make changes to your profile here. Click save when youre done.
+            Make changes to your Corner.
           </DialogDescription>
         </DialogHeader>
         <form  onSubmit={handleLogin} className="grid gap-4 py-4">
@@ -83,7 +87,7 @@ export default function LoginAdmin() {
             />
           </div>
         </div>
-        {error && <p className="text-red-600">{error}</p>}
+        {error && <p className="text-red-600">Invalid Email or Password</p>}
         <DialogFooter>
           <Button type="submit" disabled={loading}>
             Log In
