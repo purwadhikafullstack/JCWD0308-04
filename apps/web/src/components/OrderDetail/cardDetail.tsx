@@ -5,28 +5,87 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { formatToIDR } from '@/lib/utils';
 import { Input } from '../ui/input';
-import { useState } from 'react';
-import { CardDetailProps } from '@/types/product';
+import { CardDetailProps } from '@/types/types';
+import {  useContext, useState } from 'react';
+import Cookies from 'js-cookie';
+import { UserContext } from '../context/UserContext';
 
-export default function CardDetail({ selectedProducts }: CardDetailProps) {
-  const [quantities, setQuantities] = useState<{ [key: number]: number }>(
-    () =>
-      selectedProducts.reduce((acc, product) => {
-        acc[product.id] = 1; // default qty
-        return acc;
-      }, {} as { [key: number]: number })
-  );
+export default function CardDetail({
+  selectedProducts,
+  setSelectedProducts,
+}: CardDetailProps) {
+
+  const [quantity, setQuantity] = useState(1);
+  const [paymentMethod, setPaymentMethod] = useState('cash'); // 'cash' or 'card'
+  const [amountPaid, setAmountPaid] = useState<number>(0);
+  const [cardNumber, setCardNumber] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const {user} = useContext(UserContext)
+  
+
   const handleQuantityChange = (productId: number, quantity: number) => {
-    const product = selectedProducts.find(p => p.id === productId);
-    if (product) {
-      setQuantities((prevQuantities) => ({
-        ...prevQuantities,
-        [productId]: Math.min(Math.max(quantity, 1), product.stock) // Ensure quantity is between 1 and stock
-      }));
+    const idx = selectedProducts.findIndex((p) => p.id === productId);
+    if (idx !== -1) {
+      selectedProducts[idx].quantity = Math.min(
+        Math.max(quantity, 1),
+        selectedProducts[idx].stock,
+      );
+      setSelectedProducts([...selectedProducts]);
+      setQuantity(quantity);
     }
   };
+
   const totalAmount = selectedProducts.reduce(
-    (total, product) => total + product.price * quantities[product.id],0);
+    (total, product) => total + product.price * product.quantity,
+    0,
+  );
+
+  const handleSubmit = async () => {
+    if (amountPaid < totalAmount) {
+      setErrorMessage('Amount paid cannot be less than the total amount.');
+      return;
+    }
+    setIsSubmitting(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    const token = Cookies.get('token');
+    const shiftId = user
+  
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_API_URL}cashier/transactions`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            shiftId: shiftId,
+            products: selectedProducts,
+            paymentMethod,
+            amountPaid,
+            cardNumber: paymentMethod === 'card' ? cardNumber : null,
+          }),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to create transaction.');
+      }
+
+      setSuccessMessage('Transaction created successfully!');
+      setSelectedProducts([]); // Clear selected products after successful transaction
+    } catch (error) {
+      console.error('Error creating transaction:', error);
+      setErrorMessage('Failed to create transaction. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <Card className="overflow-hidden">
@@ -50,19 +109,28 @@ export default function CardDetail({ selectedProducts }: CardDetailProps) {
           <div className="font-semibold">Order Details</div>
           <ul className="grid gap-3">
             {selectedProducts.map((product) => (
-              <li key={product.id} className="flex items-center justify-between">
+              <li
+                key={product.id}
+                className="flex items-center justify-between"
+              >
                 <span className="text-muted-foreground">
-                  {product.name}  
+                  {product.name}
                   <span>
-                    <Input id={`quantity-${product.id}`}
+                    <Input
+                      id={`quantity-${product.id}`}
                       type="number"
                       min="1"
-                      value={quantities[product.id]}
+                      defaultValue={quantity}
                       onChange={(e) =>
-                        handleQuantityChange(product.id, parseInt(e.target.value) || 1)}/>
+                        handleQuantityChange(
+                          product.id,
+                          parseInt(e.target.value) || 1,
+                        )
+                      }
+                    />
                   </span>
                 </span>
-                <span>{formatToIDR(product.price * quantities[product.id])}</span>
+                <span>{formatToIDR(product.price * quantity)}</span>
               </li>
             ))}
           </ul>
@@ -76,19 +144,53 @@ export default function CardDetail({ selectedProducts }: CardDetailProps) {
         </div>
         <Separator className="my-4" />
         <div className="grid gap-3">
-          <div className="font-semibold">Cashier Information</div>
-          <dl className="grid gap-3">
-            <div className="flex items-center justify-between">
-              <dt className="text-muted-foreground">Email</dt>
-              <dd>
-                <a href="mailto:liam@acme.com">liam@acme.com</a>
-              </dd>
-            </div>
-          </dl>
+          <div className="font-semibold">Payment Information</div>
+          <div className="grid gap-4">
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                name="paymentMethod"
+                value="cash"
+                checked={paymentMethod === 'cash'}
+                onChange={() => setPaymentMethod('cash')}
+              />
+              Cash
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                name="paymentMethod"
+                value="card"
+                checked={paymentMethod === 'card'}
+                onChange={() => setPaymentMethod('card')}
+              />
+              Card
+            </label>
+            {paymentMethod === 'card' && (
+              <Input
+                type="text"
+                value={cardNumber}
+                onChange={(e) => setCardNumber(e.target.value)}
+                placeholder="Card Number"
+              />
+            )}
+            <Input
+              type="number"
+              defaultValue={amountPaid}
+              onChange={(e) => setAmountPaid(parseFloat(e.target.value) || 0)}
+              placeholder="Amount Paid"
+            />
+          </div>
         </div>
+        {errorMessage && (
+          <div className="text-red-500 text-sm mt-2">{errorMessage}</div>
+        )}
+        {successMessage && (
+          <div className="text-green-500 text-sm mt-2">{successMessage}</div>
+        )}
         <Separator className="my-4" />
-        <Button type="submit" className="w-full">
-          Charge
+        <Button type="button" onClick={handleSubmit} disabled={isSubmitting}>
+          {isSubmitting ? 'Submitting...' : 'Create Transaction'}
         </Button>
       </CardContent>
     </Card>

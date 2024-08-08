@@ -1,111 +1,84 @@
-"use client"
-import { ChevronLeft, ChevronRight, Copy, CreditCard, } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from "@/components/ui/card"
-import { Pagination, PaginationContent, PaginationItem, } from "@/components/ui/pagination"
-import { Separator } from "@/components/ui/separator"
+'use client';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Pagination } from '@/components/ui/pagination';
+import { Separator } from '@/components/ui/separator';
+import { Transaction } from '@/types/transactionTypes'; // Adjust the import path as necessary
 
-export default function RecentDetail() {
+interface RecentDetailProps {
+  transactions: Transaction[];
+}
+
+export default function RecentDetail({ transactions }: RecentDetailProps) {
   return (
     <Card className="overflow-hidden">
       <CardHeader className="flex flex-row items-start bg-muted/50">
         <div className="grid gap-0.5">
           <CardTitle className="group flex items-center gap-2 text-lg">
-            Order Id
-            <Button
-              size="icon"
-              variant="outline"
-              className="h-6 w-6 opacity-0 transition-opacity group-hover:opacity-100"
-            >
-              <Copy className="h-3 w-3" />
-              <span className="sr-only">Copy Order ID</span>
-            </Button>
+            Shift Print
           </CardTitle>
           <CardDescription>Date: November 23, 2023</CardDescription>
         </div>
       </CardHeader>
       <CardContent className="p-6 text-sm">
         <div className="grid gap-3">
-          <div className="font-semibold">Order Details</div>
-          <ul className="grid gap-3">
-            <li className="flex items-center justify-between">
-              <span className="text-muted-foreground">
-                Glimmer Lamps x <span>2</span>
-              </span>
-              <span>$250.00</span>
-            </li>
-            <li className="flex items-center justify-between">
-              <span className="text-muted-foreground">
-                Aqua Filters x <span>1</span>
-              </span>
-              <span>$49.00</span>
-            </li>
-          </ul>
-          <Separator className="my-2" />
-          <ul className="grid gap-3">
-            <li className="flex items-center justify-between">
-              <span className="text-muted-foreground">Subtotal</span>
-              <span>$299.00</span>
-            </li>
-            <li className="flex items-center justify-between">
-              <span className="text-muted-foreground">Shipping</span>
-              <span>$5.00</span>
-            </li>
-            <li className="flex items-center justify-between">
-              <span className="text-muted-foreground">Tax</span>
-              <span>$25.00</span>
-            </li>
-            <li className="flex items-center justify-between font-semibold">
-              <span className="text-muted-foreground">Total</span>
-              <span>$329.00</span>
-            </li>
-          </ul>
-        </div>
-        <Separator className="my-4" />
-        <div className="grid gap-3">
-          <div className="font-semibold">Cashier Information</div>
-          <dl className="grid gap-3">
-            <div className="flex items-center justify-between">
-              <dt className="text-muted-foreground">Email</dt>
-              <dd><a href="mailto:">liam@acme.com</a></dd>
+          {transactions.map(transaction => (
+            <div key={transaction.id}>
+              <div className="font-semibold">Cashier Information</div>
+              <dl className="grid gap-3">
+                <div className="flex items-center justify-between">
+                  <dt className="text-muted-foreground">Name</dt>
+                  <dd>{transaction.cashier.name}</dd>
+                </div>
+                <div className="flex items-center justify-between">
+                  <dt className="text-muted-foreground">Email</dt>
+                  <dd><a href={`mailto:${transaction.cashier.email}`}>{transaction.cashier.email}</a></dd>
+                </div>
+              </dl>
+              <Separator className="my-2" />
+              <div className="font-semibold">Total Sales</div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Total Amount</span>
+                <span>{`$${transaction.totalSales}`}</span>
+              </div>
+              <Separator className="my-2" />
+              <div className="font-semibold">Transactions</div>
+              <ul className="grid gap-3">
+                {transaction.TransactionProduct.map(product => (
+                  <li key={product.id}>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Product</span>
+                      <span>{product.product.name}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Quantity</span>
+                      <span>{product.quantity}</span>
+                    </div>
+                  </li>
+                ))}
+                {transaction.Payment.map(payment => (
+                  <li key={payment.id}>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Payment Method</span>
+                      <span>{payment.method}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Amount</span>
+                      <span>{`$${payment.amount}`}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              <Separator className="my-4" />
             </div>
-          </dl>
-        </div>
-        <Separator className="my-4" />
-        <div className="grid gap-3">
-          <div className="font-semibold">Payment Information</div>
-          <dl className="grid gap-3">
-            <div className="flex items-center justify-between">
-              <dt className="flex items-center gap-1 text-muted-foreground">
-                <CreditCard className="h-4 w-4" />
-                Visa
-              </dt>
-              <dd>**** **** **** 4532</dd>
-            </div>
-          </dl>
+          ))}
         </div>
       </CardContent>
       <CardFooter className="flex flex-row items-center border-t bg-muted/50 px-6 py-3">
         <div className="text-xs text-muted-foreground">
           Updated <time dateTime="2023-11-23">November 23, 2023</time>
         </div>
-        <Pagination className="ml-auto mr-0 w-auto">
-          <PaginationContent>
-            <PaginationItem>
-              <Button size="icon" variant="outline" className="h-6 w-6">
-                <ChevronLeft className="h-3.5 w-3.5" />
-                <span className="sr-only">Previous Order</span>
-              </Button>
-            </PaginationItem>
-            <PaginationItem>
-              <Button size="icon" variant="outline" className="h-6 w-6">
-                <ChevronRight className="h-3.5 w-3.5" />
-                <span className="sr-only">Next Order</span>
-              </Button>
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
+        <Pagination className="ml-auto mr-0 w-auto"></Pagination>
       </CardFooter>
     </Card>
-  )
+  );
 }

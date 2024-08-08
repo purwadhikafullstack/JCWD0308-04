@@ -1,37 +1,52 @@
-import { TokenProps } from "@/types/product";
-import { FormEvent, useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+import { TokenProps } from '@/types/types';
+import { FormEvent, useState } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 
-export function DialogCreateProduct({token}: TokenProps) {
-    const [name, setName] = useState('')
-    const [stock, setStock] = useState('')
-    const [price, setPrice] = useState('')
+export function DialogCreateProduct({ token }: TokenProps) {
+  const [name, setName] = useState('');
+  const [stock, setStock] = useState('');
+  const [price, setPrice] = useState('');
 
-    const handleSubmit = async (event: FormEvent) => {
-        event.preventDefault()
-        try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}admin/createProduct`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type' : 'application/json',
-                    'Authorization' : `Bearer ${token}`
-                },
-                body: JSON.stringify({name, stock: Number(stock), price: Number(price)})
-            })
-            if(response.ok){
-                throw('Product Created')
-            }
-        } catch (error) {
-            throw(error)
-        }
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault();
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_API_URL}admin/createProduct`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            name,
+            stock: Number(stock),
+            price: Number(price),
+          }),
+        },
+      );
+      if (response.ok) {
+        throw 'Product Created';
+      }
+    } catch (error) {
+      throw error;
     }
-    return (
-        <Dialog>
+  };
+  return (
+    <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">Add New Product</Button>
+        <Button variant="default">Add New Product</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
@@ -41,49 +56,49 @@ export function DialogCreateProduct({token}: TokenProps) {
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="grid gap-4 py-4">
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
-              Name
-            </Label>
-            <Input
-              id="name"
-              type="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="col-span-3"
-            />
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="name" className="text-right">
+                Name
+              </Label>
+              <Input
+                id="name"
+                type="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="stock" className="text-right">
+                Stock
+              </Label>
+              <Input
+                id="stock"
+                type="stock"
+                value={stock}
+                onChange={(e) => setStock(e.target.value)}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="price" className="text-right">
+                Price
+              </Label>
+              <Input
+                id="price"
+                type="price"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                className="col-span-3"
+              />
+            </div>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="stock" className="text-right">
-              Stock
-            </Label>
-            <Input
-              id="stock"
-              type="stock"
-              value={stock}
-              onChange={(e) => setStock(e.target.value)}
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="price" className="text-right">
-              Price
-            </Label>
-            <Input
-              id="price"
-              type="price"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              className="col-span-3"
-            />
-          </div>
-        </div>
-        <DialogFooter>
-          <Button type="submit">Create</Button>
-        </DialogFooter>
+          <DialogFooter>
+            <Button type="submit">Create</Button>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
-    )
+  );
 }

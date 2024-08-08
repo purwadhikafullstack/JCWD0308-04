@@ -35,7 +35,7 @@ export function DialogEndShift() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">End Shift</Button>
+        <Button variant="secondary">End Shift</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>

@@ -1,14 +1,14 @@
 'use client';
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { fetchProducts } from "@/lib/fetch";
-import { formatToIDR } from "@/lib/utils";
-import CardDetail from "@/components/OrderDetail/cardDetail";
-import Cookies from "js-cookie";
-import { TokenProps, Product } from "@/types/product";
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle,} from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '@/components/ui/table';
+import { fetchProducts } from '@/lib/fetch';
+import { formatToIDR } from '@/lib/utils';
+import CardDetail from '@/components/OrderDetail/cardDetail';
+import Cookies from 'js-cookie';
+import { Product } from '@/types/types';
 
 export default function Orders() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -16,17 +16,19 @@ export default function Orders() {
   const [isLoading, setIsLoading] = useState(true);
   const [shiftStarted, setShiftStarted] = useState<boolean>(false);
   const router = useRouter();
-  const token = Cookies.get('token')!
-
-
+  const token = Cookies.get('token')!;
+  
   useEffect(() => {
     const checkShiftStatus = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}/cashier/shift-status`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_API_URL}/cashier/shift-status`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           },
-        });
+        );
         const data = await response.json();
         setShiftStarted(data.shiftStarted);
       } catch (error) {
@@ -57,22 +59,21 @@ export default function Orders() {
 
   const handleProductClick = (product: Product) => {
     setSelectedProducts((prevSelected) => {
-      const isSelected = prevSelected.some(p => p.id === product.id);
+      const isSelected = prevSelected.some((p) => p.id === product.id);
       if (isSelected) {
-        return prevSelected.filter(p => p.id !== product.id);
+        return prevSelected.filter((p) => p.id !== product.id);
       } else {
-        return [...prevSelected, product];
+        return [...prevSelected, { ...product, quantity: 1 }];
       }
     });
   };
-
   if (isLoading) {
     return <div>Loading...</div>;
   }
 
   return (
-    <div className="grid flex-1 gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 lg:grid-cols-3 xl:grid-cols-3">
-      <div className="grid pl-20">
+    <div className="grid sm:px-0  sm:py-0 md:gap-8 lg:grid-cols-2 xl:grid-cols-2 mx-20 gap-4 mt-5">
+      <div className="">
         <Card>
           <CardHeader>
             <CardTitle>Point Of Sales</CardTitle>
@@ -93,7 +94,11 @@ export default function Orders() {
               <TableBody>
                 {products.length > 0 ? (
                   products.map((product) => (
-                    <TableRow key={product.id} onClick={() => handleProductClick(product)} className="cursor-pointer">
+                    <TableRow
+                      key={product.id}
+                      onClick={() => handleProductClick(product)}
+                      className="cursor-pointer"
+                    >
                       <TableCell className="hidden sm:table-cell">
                         <Image
                           alt="Product image"
@@ -103,9 +108,13 @@ export default function Orders() {
                           width="64"
                         />
                       </TableCell>
-                      <TableCell className="font-medium">{product.name}</TableCell>
+                      <TableCell className="font-medium">
+                        {product.name}
+                      </TableCell>
                       <TableCell>{product.stock}</TableCell>
-                      <TableCell className="hidden md:table-cell">{formatToIDR(product.price)}</TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        {formatToIDR(product.price)}
+                      </TableCell>
                     </TableRow>
                   ))
                 ) : (
@@ -117,7 +126,11 @@ export default function Orders() {
         </Card>
       </div>
       <div>
-        <CardDetail selectedProducts={selectedProducts} products={[]} />
+        <CardDetail
+          selectedProducts={selectedProducts}
+          setSelectedProducts={setSelectedProducts}
+          products={[]}
+        />
       </div>
     </div>
   );

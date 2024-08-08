@@ -1,14 +1,14 @@
 'use client'
 import Image from "next/image"
 import Link from "next/link"
-import { BookKey, Clock, Home, LineChart, Package, PanelLeft, Search, ShoppingCart, Users2 } from "lucide-react"
+import Cookies from "js-cookie"
+import { BookKey, Clock, Home, Package, PanelLeft, Search, ShoppingCart, Users2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useRouter } from "next/navigation"
-import Cookies from "js-cookie"
 import { useEffect, useState } from "react"
 
 export function Navbar() {
@@ -18,10 +18,8 @@ export function Navbar() {
   const [userRole, setUserRole] = useState<string | null>(null)
 
   useEffect(() => {
-    // console.log('Cookies', document.cookie);
     const token = Cookies.get('token')
     const role = Cookies.get('role') || null
-    // console.log(role);
     if (token) {
       setIsAuth(true)
       setUserRole(role)
@@ -30,22 +28,19 @@ export function Navbar() {
     }
     setIsLoaded(true)
   }, [])
-
   useEffect(() => {
     if (isLoaded && !isAuth) {
       router.push('/')
     }
   }, [isLoaded, isAuth, router])
-
   const handleLogout = () => {
     Cookies.remove('token')
     Cookies.remove('role')
     setIsAuth(false)
     router.push('/')
   }
-
   if (!isLoaded || !isAuth) return null // Avoid rendering until the auth status is confirmed
-
+ 
   return (
     <div>
       <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
@@ -61,8 +56,6 @@ export function Navbar() {
               <TooltipContent side="right">Home</TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          {/* {userRole === 'cashier' && ( */}
-          <>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -85,11 +78,6 @@ export function Navbar() {
                 <TooltipContent side="right">Activity</TooltipContent>
               </Tooltip>
             </TooltipProvider>
-            </>
-          {/* )} */}
-        
-          {/* {userRole === 'admin' && ( */}
-            <>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -115,7 +103,7 @@ export function Navbar() {
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Link href="" className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8">
+                    <Link href="/admin/recentShift" className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8">
                       <BookKey  className="h-5 w-5" />
                       <span className="sr-only">Recent Shift</span>
                     </Link>
@@ -123,7 +111,6 @@ export function Navbar() {
                   <TooltipContent side="right">Recent Shift</TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-            </>
           {/* )} */}
 
         </nav>
@@ -139,37 +126,27 @@ export function Navbar() {
             </SheetTrigger>
             <SheetContent side="left" className="sm:max-w-xs">
               <nav className="grid gap-6 text-lg font-medium">
-                <Link href="#" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
+                <Link href="/" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
                   <Home className="h-5 w-5" />
                   Dashboard
                 </Link>
-                <Link href="#" className="flex items-center gap-4 px-2.5 text-foreground">
+                <Link href="/orders" className="flex items-center gap-4 px-2.5 text-foreground">
                   <ShoppingCart className="h-5 w-5" />
                   Point Of Sales
                 </Link>
-                {/* Conditionally render sidebar items based on role */}
-                {/* {userRole === 'admin' && ( */}
-                  <>
-                    <Link href="#" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
+                    <Link href="/admin/productManagements" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
                       <Package className="h-5 w-5" />
-                      Products
+                      Products Managements
                     </Link>
                     <Link href="#" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
                       <Users2 className="h-5 w-5" />
                       Customers
                     </Link>
-                  </>
-                {/* )} */}
-                {/* {userRole === 'cashier' && ( */}
-                  <Link href="#" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
+                  
+                  <Link href="/activity" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
                     <Clock className="h-5 w-5" />
-                    Current Shift
+                    Activity
                   </Link>
-                {/* )} */}
-                <Link href="#" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
-                  <LineChart className="h-5 w-5" />
-                  Settings
-                </Link>
               </nav>
             </SheetContent>
           </Sheet>
@@ -178,6 +155,8 @@ export function Navbar() {
             <Input
               type="search"
               placeholder="Search..."
+              // value={searchQuery}
+              // onChange={handleSearchChange}
               className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]"
             />
           </div>
@@ -191,7 +170,6 @@ export function Navbar() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {/* <DropdownMenuLabel>My Account</DropdownMenuLabel> */}
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
             </DropdownMenuContent>

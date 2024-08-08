@@ -22,16 +22,25 @@ export class CashierControllers {
             const payload = {id: cashier.id, email: cashier.email, role: cashier.role}
             const token = sign(payload, process.env.KEY_JWT!, {expiresIn: '1h'})
             const role  = cashier.role
+            const cashierId = cashier.id
 
-            res.status(200).json({token, role})
+            res.status(200).json({token, role, cashierId})
         } catch (error) {
             res.status(500).json({error: 'Internal Server Error'})
+        }
+    }
+    async GetShiftId(req: Request, res: Response) {
+        const shiftId = req.user.id
+        try {
+           res.json(shiftId)
+        } catch (error) {
+            console.error('Error Get ShiftId');
+            
         }
     }
     async StartShift(req: Request, res: Response) {
         try {
             const { startAmount } = req.body
-            console.log(req.body)
             const cashierId = (req.user as User )?.id
             if(!cashierId) {
                 return res.status(400).json({error: 'Cashier ID is missing' })
@@ -121,48 +130,59 @@ export class CashierControllers {
             res.status(500).json({ error: 'Internal Server Error' });
           }
     }
-    async RecordTransaction(req: Request, res: Response) {
-        const { shiftId, products, paymentMethod, amountPaid, cardNumber} = req.body
-        if(!Array.isArray(products) || products.length === 0){
-            return res.status(400).json({error: 'No Products Provided'})
+    async Transaction(req: Request, res: Response) {
+        const { shiftId, products, paymentMethod, amountPaid, cardNumber } = req.body;
+        
+        if (!Array.isArray(products) || products.length === 0) {
+            return res.status(400).json({ error: 'No Products Provided' });
         }
+    
         try {
-            const transaction = await prisma.$transaction(async(prisma) => {
+            const transaction = await prisma.$transaction(async (prisma) => {
                 const newTransaction = await prisma.transaction.create({
                     data: {
                         shiftID: shiftId,
-                        totalPrice: products.reduce(
-                            (total, product) => 
-                                total + product.price * product.quantity, 0)
-                    }
-                })
+                        totalPrice: products.reduce((total, product) => total + product.price * product.quantity, 0),
+                    },
+                });
+    
                 await Promise.all(products.map(async (product) => {
+                    const productInDB = await prisma.product.findUnique({ where: { id: product.id } });
+    
+                    if (!productInDB || productInDB.stock < product.quantity) {
+                        throw new Error(`Insufficient stock for product ${product.name}`);
+                    }
+    
+                    await prisma.product.update({
+                        where: { id: product.id },
+                        data: { stock: productInDB.stock - product.quantity },
+                    });
+    
                     await prisma.transactionProduct.create({
                         data: {
                             transactionId: newTransaction.id,
                             productId: product.id,
                             quantity: product.quantity,
-                        }
-                    })
-                    await prisma.product.update({
-                        where: { id: product.id},
-                        data: { stock: { decrement: product.quantity}}
-                    })
-                }))
-                await prisma.payment.create({
+                        },
+                    });
+                }));
+    
+                const newPayment = await prisma.payment.create({
                     data: {
                         transactionId: newTransaction.id,
                         method: paymentMethod,
                         amount: amountPaid,
-                        cardNumber: paymentMethod === 'debit' ? cardNumber : null,
-                        change: paymentMethod === 'cash' ? (amountPaid - newTransaction.totalPrice) : null,
-                    }
-                })
-                return newTransaction
-            })
-            res.status(201).json(transaction)
+                        change: amountPaid - newTransaction.totalPrice,
+                        cardNumber: cardNumber || null,
+                    },
+                });
+    
+                return { transaction: newTransaction, payment: newPayment };
+            });
+    
+            res.status(201).json(transaction);
         } catch (error) {
-            res.status(500).json({error: 'Internal Server Error'})
+            res.status(500).json({ error: 'Failed to record transaction'});
         }
     }
     async GetDailyTransactions(req: Request, res: Response) {

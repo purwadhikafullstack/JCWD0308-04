@@ -1,11 +1,23 @@
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { DialogEditProductsProps } from "@/types/product";
-import { useState, useEffect } from "react";
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { DialogEditProductsProps } from '@/types/types';
+import { useState, useEffect } from 'react';
 
-export function DialogEditProducts({ product, token, onProductUpdated }: DialogEditProductsProps) {
+export function DialogEditProducts({
+  product,
+  token,
+  onProductUpdated,
+}: DialogEditProductsProps) {
   const [name, setName] = useState('');
   const [stock, setStock] = useState('');
   const [price, setPrice] = useState('');
@@ -31,14 +43,21 @@ export function DialogEditProducts({ product, token, onProductUpdated }: DialogE
     }
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}/admin/updateProduct/${product?.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_API_URL}/admin/updateProduct/${product?.id}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            name,
+            stock: parseInt(stock),
+            price: parseInt(price),
+          }),
         },
-        body: JSON.stringify({ name, stock: parseInt(stock), price: parseInt(price) }),
-      });
+      );
 
       if (!response.ok) {
         const data = await response.json();

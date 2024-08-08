@@ -24,11 +24,12 @@ export class AdminRouter{
         this.router.get('/getProduct', this.adminControllers.getProducts) //done
         this.router.put('/updateProduct/:id', this.adminControllers.updateProduct) //done
         this.router.delete('/delete-product/:id', this.adminControllers.deleteProduct) //done
-        // this.router.patch('/adjustStock', this.adminControllers.adjustStock) //done
         // Sales Report
         this.router.get('/getDailySalesReport', this.adminControllers.getDailySalesReport)
         this.router.get('/getProductSalesReport', this.adminControllers.getProductSalesReport)
         this.router.get('/getShiftSalesReport', this.adminControllers.getShiftSalesReport)
+        this.router.get('/getConsolidatedDailySalesReport', this.adminControllers.getConsolidatedDailySalesReport)
+
     }
     getRouter()  {
         return this.router

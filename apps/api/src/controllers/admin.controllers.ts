@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
 import { sign } from 'jsonwebtoken'
-import { hash } from "bcrypt";
+import { compare, hash } from "bcrypt";
 
 const prisma = new PrismaClient()
 export class AdminControllers {
@@ -14,9 +14,10 @@ export class AdminControllers {
             if (!admin) {
                return res.status(404).json({ error: 'Admin Not Found' });
              }
-             if (password !== admin.password) {
-               return res.status(401).json({ error: 'Invalid Credentials' });
-             }
+            const isValid = await compare(password, admin.password)
+            if(!isValid) {
+                return res.status(401).json({ error: 'Invalid Password' });
+            }
             const payload = {id:admin.id, email:admin.email, role: admin.role}
             const token = sign(payload, process.env.KEY_JWT!, {expiresIn: '1h'})
             const role = admin.role
@@ -50,7 +51,6 @@ export class AdminControllers {
         try {
             const  id  = req.params.id;
             const { email, newPassword } = req.body;
-            // console.log(currentPassword);
             const cashier = await prisma.cashier.findUnique({
                 where: { id: parseInt(id) },
             });
@@ -148,22 +148,23 @@ export class AdminControllers {
     // Sales Report 
     async getDailySalesReport(req: Request, res: Response) {
         try {
-            const { date } = req.query;
-            if (!date) {
-                return res.status(400).json({ error: 'Date is required' });
-            }
+            // const { date } = req.query;
+            // if (!date) {
+            //     return res.status(400).json({ error: 'Date is required' });
+            // }
             const transactions = await prisma.transaction.findMany({
-                where: {
-                    createdAt: {
-                        gte: new Date(date as string),
-                        lt: new Date(new Date(date as string).setDate(new Date(date as string).getDate() + 1)),
-                    },
-                },
+                // where: {
+                //     createdAt: {
+                //         gte: new Date(date as string),
+                //         lt: new Date(new Date(date as string).setDate(new Date(date as string).getDate() + 1)),
+                //     },
+                // },
                 include: {
                     Payment: true,
                     TransactionProduct: {
                         include: {
                             product: true,
+                            // cashier: true
                         },
                     },
                 },
@@ -175,22 +176,22 @@ export class AdminControllers {
     }
     async getProductSalesReport(req: Request, res: Response) {
         try {
-            const { date } = req.query;
-            if (!date) {
-                return res.status(400).json({ error: 'Date is required' });
-            }
+            // const { date } = req.query;
+            // if (!date) {
+            //     return res.status(400).json({ error: 'Date is required' });
+            // }
             const sales = await prisma.transactionProduct.groupBy({
                 by: ['productId'],
-                where: {
-                    trasaction: {
-                        createdAt: {
-                            gte: new Date(date as string),
-                            lt: new Date(new Date(date as string).setDate(new Date(date as string).getDate() + 1)),
-                        },
-                    },
-                },
-                _sum: { quantity: true },
-                _count: { _all: true },
+            //     where: {
+            //         transaction: {
+            //             createdAt: {
+            //                 gte: new Date(date as string),
+            //                 lt: new Date(new Date(date as string).setDate(new Date(date as string).getDate() + 1)),
+            //             },
+            //         },
+            //     },
+            //     _sum: { quantity: true },
+            //     _count: { _all: true },
             });
             res.status(200).json(sales);
         } catch (error) {
@@ -213,6 +214,7 @@ export class AdminControllers {
                 include: {
                     cashier: true,
                     Transaction: true,
+                    
                 },
             });
             res.status(200).json(shifts);
@@ -220,4 +222,64 @@ export class AdminControllers {
             res.status(500).json({ error: 'Internal Server Error' });
         }
     }
+    async getConsolidatedDailySalesReport(req: Request, res: Response) {
+        try {
+          const { date } = req.query;
+          if (!date) {
+            return res.status(400).json({ error: "Date is required" });
+          }
+    
+          // Define start and end date for the given day
+          const startDate = new Date(date as string);
+          const endDate = new Date(startDate);
+          endDate.setDate(startDate.getDate() + 1);
+    
+          // Fetch shifts with related cashier and transactions
+          const shifts = await prisma.shift.findMany({
+            where: {
+              startTime: {
+                gte: startDate,
+                lt: endDate,
+              },
+            },
+            include: {
+              cashier: true,
+              Transaction: {
+                include: {
+                  Payment: true,
+                  TransactionProduct: {
+                    include: {
+                      product: true,
+                    },
+                  },
+                },
+              },
+            },
+          });
+    
+          const consolidatedReport = shifts.map(shift => {
+            const totalSales = shift.Transaction.reduce((total, transaction) => {
+              return total + transaction.Payment.reduce((sum, payment) => sum + payment.amount, 0);
+            }, 0);
+    
+            return {
+              shiftId: shift.id,
+              cashier: {
+                email: shift.cashier.email,
+              },
+              totalSales,
+              transactions: shift.Transaction.map(transaction => ({
+                transactionId: transaction.id,
+                paymentDetails: transaction.Payment,
+                transactionProducts: transaction.TransactionProduct,
+              })),
+            };
+          });
+    
+          res.status(200).json(consolidatedReport);
+        } catch (error) {
+          console.error("Failed to fetch consolidated daily sales report:", error);
+          res.status(500).json({ error: "Internal Server Error" });
+        }
+      }
 }
