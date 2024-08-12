@@ -14,34 +14,37 @@ export default function LoginAdmin() {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState("")
     const router = useRouter()
-    // const { setUser } = useContext(UserContext) ?? {}
+    // const { shiftId } = useContext(UserContext)
     
     const handleLogin = async (event: React.FormEvent) =>{
         event.preventDefault()
         setLoading(true)
-        // setError("")
+        setError("")
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}admin/login`,{
                 method: "POST",
                 headers: { "Content-Type": "application/json"},
                 body: JSON.stringify({email, password})
             })
-            // setUser?.(data)
-            if (!response.ok) {
-              const errorData = await response.json();
-              throw new Error(errorData.error || 'Login Failed');
+            if (response.ok) {
+              const data = await response.json();
+              const expires = new Date()
+
+              expires.setHours(expires.getHours() + 6)
+              Cookies.set("token", data.token, {
+                  expires: expires,
+                  sameSite: 'Strict'
+              })
+              
+              router.push("/admin/productManagements")
+              alert('Login Success')
+              // setUser(data.adminId)
+            } else {
+              const errorData = await response.json()
+              throw new Error(errorData.error || 'Login Failed')
             }
-            const expires = new Date()
-            expires.setHours(expires.getHours() + 6)
-            const { token } = await response.json();
-            Cookies.set("token", token, {
-                expires: expires,
-                sameSite: 'Strict'
-            })
-            router.push("/admin/productManagements")
-            alert('Login Success')
-        } catch (error: any) {
-            setError(error.message || "An error occurred")
+        } catch (error) {
+          console.error('Login error', error)
         }
         setLoading(false)
     }
@@ -98,3 +101,4 @@ export default function LoginAdmin() {
     </Dialog>
   )
 }
+

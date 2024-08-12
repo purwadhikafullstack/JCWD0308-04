@@ -2,34 +2,50 @@
 import Cookies from 'js-cookie';
 import { createContext, ReactNode, useEffect, useState } from 'react';
 
-export const UserContext = createContext<any>({});
+export interface UserContextProps {
+  shiftId: number;
+  setShiftId: (id: number) => void;
+}
+
+export const UserContext = createContext<UserContextProps | undefined>(undefined);
+
 interface UserContextProviderProps {
   children: React.ReactNode;
 }
 
-export function UserContextProvider({ children } : UserContextProviderProps) {
-  const [user, setUser] = useState<number>(0);
+export function UserContextProvider({ children }: UserContextProviderProps) {
+  const [shiftId, setShiftId] = useState<number>(0);
   const token = Cookies.get('token');
 
-  const getApi = async () => {
-    const response = await fetch(`http://localhost:8000/api/cashier/getShiftId`,{
-      method: 'POST',
-      headers: {
-        'Authorization' : `Bearer ${token}`
-      },
-    })
-    const data = await response.json()
-    setUser(data)
-  }
+  const getShiftID = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/cashier/getShiftId', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch shift ID');
+      }
+
+      const data = await response.json();
+      setShiftId(data.shiftId || 0);
+    } catch (error) {
+      console.error('Error fetching shift ID:', error);
+      setShiftId(0);
+    }
+  };
+
   useEffect(() => {
-    if(token) {
-      
-      getApi()
+    if (token) {
+      getShiftID();
     }
   }, [token]);
 
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider value={{ shiftId, setShiftId }}>
       {children}
     </UserContext.Provider>
   );

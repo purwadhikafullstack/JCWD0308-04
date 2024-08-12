@@ -47,11 +47,10 @@ export interface DialogEndShiftProps {
   shiftId: number;
 }
 
-// types.ts
+
 export interface Cashier {
-  name: string;
+  id: number;
   email: string;
-  initials: string;
 }
 
 export interface Payment {
@@ -64,25 +63,27 @@ export interface TransactionProduct {
   id: string;
   product: {
     name: string;
+    price: number;
+    stock: number;
   };
   quantity: number;
 }
 
 export interface Transaction {
-  id: string;
-  Payment: Payment[];
-  TransactionProduct: TransactionProduct[];
+  transactionId: string;
+  paymentDetails: Payment[];
+  transactionProducts: TransactionProduct[];
 }
 
 export interface ShiftReport {
   shiftId: string;
   cashier: Cashier;
+  startAmount: number;
+  endAmount: number;
+  createdAt : Date
   totalSales: number;
   transactions: Transaction[];
 }
-
-
-// types.ts
 
 
 

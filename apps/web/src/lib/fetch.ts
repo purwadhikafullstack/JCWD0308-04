@@ -1,4 +1,4 @@
-import { Product, Cashier } from '@/types/types';
+import { Product, Cashier, Transaction } from '@/types/types';
 import Cookies from 'js-cookie';
 
 export const fetchProducts = async (token: string): Promise<Product[]> => {

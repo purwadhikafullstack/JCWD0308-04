@@ -30,12 +30,39 @@ export class CashierControllers {
         }
     }
     async GetShiftId(req: Request, res: Response) {
-        const shiftId = req.user.id
+      try {
+          const cashierId = req.user.id;
+          const shift = await prisma.shift.findFirst({
+              where: {
+                  cashierId,
+                  endTime: null,
+              },
+              select: { id: true },
+          });
+          if (!shift) {
+              return res.status(404).json({ error: 'No active shift found' });
+          }
+          res.json({ shiftId: shift.id });
+      } catch (error) {
+          console.error('Error retrieving shift ID:', error);
+          res.status(500).json({ error: 'Internal Server Error' });
+      }
+  }
+    async getCashierId(req: Request, res: Response) {
         try {
-           res.json(shiftId)
+          const userId = req.user.id;
+          const cashier = await prisma.cashier.findUnique({
+            where: { id: userId },
+            select: { id: true }
+          });
+    
+          if (!cashier) {
+            return res.status(404).json({ error: 'Cashier not found' });
+          }
+    
+          res.json({ cashierId: cashier.id });
         } catch (error) {
-            console.error('Error Get ShiftId');
-            
+          res.status(500).json({ error: 'Internal Server Error' });
         }
     }
     async StartShift(req: Request, res: Response) {
@@ -53,7 +80,7 @@ export class CashierControllers {
                 }
             })
             
-            res.status(201).json(shift)
+            res.status(201).json({shiftId: shift.id})
         } catch (error) {
             res.status(500).json({error: 'Internal Server Error'})
         }
@@ -87,6 +114,12 @@ export class CashierControllers {
               cashierId: verifiedUser.id,
               endTime: null,
             },
+            include: {
+                // Transaction: true,
+                cashier: true,
+                _count: true
+            },
+            
           });
           if (!shift) {
             return res.status(404).json({ error: 'No active shift found' });
@@ -141,8 +174,9 @@ export class CashierControllers {
             const transaction = await prisma.$transaction(async (prisma) => {
                 const newTransaction = await prisma.transaction.create({
                     data: {
-                        shiftID: shiftId,
+                        shiftId: shiftId,
                         totalPrice: products.reduce((total, product) => total + product.price * product.quantity, 0),
+                        createdAt: new Date(),
                     },
                 });
     
@@ -199,12 +233,11 @@ export class CashierControllers {
                     },
                 },
                 include: {
+                    shift: {include : {cashier: true}}, 
                     Payment: true,
-                    TransactionProduct: {
-                        include: {
-                            product: true,
-                        },
+                    TransactionProduct: { include: { product: true },
                     },
+                    
                 },
             });
             res.status(200).json(transactions);

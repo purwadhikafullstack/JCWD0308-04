@@ -6,7 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { formatToIDR } from '@/lib/utils';
 import { Input } from '../ui/input';
 import { CardDetailProps } from '@/types/types';
-import {  useContext, useState } from 'react';
+import { useContext, useState } from 'react';
 import Cookies from 'js-cookie';
 import { UserContext } from '../context/UserContext';
 
@@ -14,16 +14,20 @@ export default function CardDetail({
   selectedProducts,
   setSelectedProducts,
 }: CardDetailProps) {
-
   const [quantity, setQuantity] = useState(1);
-  const [paymentMethod, setPaymentMethod] = useState('cash'); // 'cash' or 'card'
+  const [paymentMethod, setPaymentMethod] = useState('cash');
   const [amountPaid, setAmountPaid] = useState<number>(0);
   const [cardNumber, setCardNumber] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const {user} = useContext(UserContext)
-  
+
+  // Use context with type guard
+  const context = useContext(UserContext);
+  if (!context) {
+    throw new Error('UserContext is undefined. Ensure it is used within a UserContextProvider.');
+  }
+  const { shiftId } = context;
 
   const handleQuantityChange = (productId: number, quantity: number) => {
     const idx = selectedProducts.findIndex((p) => p.id === productId);
@@ -43,17 +47,22 @@ export default function CardDetail({
   );
 
   const handleSubmit = async () => {
+    if (!shiftId) {
+      setErrorMessage('Shift ID is missing. Please start your shift.');
+      return;
+    }
+
     if (amountPaid < totalAmount) {
       setErrorMessage('Amount paid cannot be less than the total amount.');
       return;
     }
+
     setIsSubmitting(true);
     setErrorMessage(null);
     setSuccessMessage(null);
 
     const token = Cookies.get('token');
-    const shiftId = user
-  
+
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_API_URL}cashier/transactions`,
@@ -61,10 +70,10 @@ export default function CardDetail({
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
+            'Authorization': `Bearer ${token}`,
           },
           body: JSON.stringify({
-            shiftId: shiftId,
+            shiftId,
             products: selectedProducts,
             paymentMethod,
             amountPaid,

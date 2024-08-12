@@ -1,10 +1,9 @@
-// types/transactionTypes.ts
-
 export interface Product {
   id: string;
   name: string;
+  price: number;
+  stock: number;
 }
-
 export interface TransactionProduct {
   id: string;
   product: Product;
@@ -15,18 +14,20 @@ export interface Payment {
   id: string;
   method: string;
   amount: number;
+  change: number;
+  cardNumber: number;
 }
 
 export interface Cashier {
   id: string;
-  name: string;
   email: string;
 }
 
 export interface Transaction {
   id: string;
-  cashier: Cashier;
-  totalSales: number;
+  shift: { cashier: Cashier };
+  totalPrice: number;
+  createdAt: Date;
   Payment: Payment[];
   TransactionProduct: TransactionProduct[];
 }

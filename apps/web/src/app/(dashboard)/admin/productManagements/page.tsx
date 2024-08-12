@@ -44,7 +44,7 @@ export default function ProductManagements() {
     try {
       const success = await deleteProduct(productId, token);
       if (success) {
-        setProducts(products.filter((product) => product.id != productId));
+        setProducts(products.filter((product) => product.id !== productId));
       }
     } catch (error) {
       console.error('Error deleting product', error);
@@ -61,10 +61,10 @@ export default function ProductManagements() {
   };
 
   return (
-    <div className="px-20">
+    <div className="p-4 sm:p-6 lg:p-8 xl:mx-20">
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-4xl">Product Managements.</CardTitle>
+          <CardTitle className="text-2xl sm:text-4xl">Product Managements</CardTitle>
           <CardDescription>
             <DialogCreateProduct token={token} />
           </CardDescription>
@@ -73,13 +73,12 @@ export default function ProductManagements() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="hidden w-[100px] sm:table-cell">
+                <TableHead className="hidden sm:table-cell">
                   <span className="sr-only">Image</span>
                 </TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Stock</TableHead>
                 <TableHead className="hidden md:table-cell">Price</TableHead>
-                <TableHead></TableHead>
                 <TableHead>Edit</TableHead>
                 <TableHead>Delete</TableHead>
               </TableRow>
@@ -97,14 +96,11 @@ export default function ProductManagements() {
                         width="64"
                       />
                     </TableCell>
-                    <TableCell className="font-medium">
-                      {product.name}
-                    </TableCell>
+                    <TableCell className="font-medium">{product.name}</TableCell>
                     <TableCell>{product.stock}</TableCell>
                     <TableCell className="hidden md:table-cell">
                       {formatToIDR(product.price)}
                     </TableCell>
-                    <TableCell>-</TableCell>
                     <TableCell>
                       <DialogEditProducts
                         product={product}
@@ -112,7 +108,7 @@ export default function ProductManagements() {
                         onProductUpdated={handleProductUpdated}
                       />
                     </TableCell>
-                    <TableCell className="tb gap-5">
+                    <TableCell className="text-center">
                       <Button
                         variant="destructive"
                         onClick={() => handleDelete(product.id)}
@@ -124,7 +120,7 @@ export default function ProductManagements() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center">
+                  <TableCell colSpan={6} className="text-center">
                     No products available
                   </TableCell>
                 </TableRow>

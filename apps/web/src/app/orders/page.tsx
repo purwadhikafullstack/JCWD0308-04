@@ -35,7 +35,6 @@ export default function Orders() {
         console.error('Error checking shift status:', error);
       }
     };
-
     const loadProducts = async () => {
       try {
         const data = await fetchProducts(token);
@@ -46,14 +45,13 @@ export default function Orders() {
         setIsLoading(false);
       }
     };
-
     checkShiftStatus();
     loadProducts();
   }, [token]);
 
   useEffect(() => {
     if (!shiftStarted && !isLoading) {
-      router.push('/activity');
+      router.push('/');
     }
   }, [shiftStarted, isLoading, router]);
 
