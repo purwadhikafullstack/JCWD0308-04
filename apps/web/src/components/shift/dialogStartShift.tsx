@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export function DialogStartShift() {
@@ -10,6 +11,7 @@ export function DialogStartShift() {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const router = useRouter()
 
   const handleSubmit = async () => {
     const token = Cookies.get('token');
@@ -36,6 +38,7 @@ export function DialogStartShift() {
 
       setSuccessMessage('Shift started successfully!');
       setStartAmount('');
+      router.push("/orders")
     } catch (error) {
       console.error("Error starting shift:", error);
       setErrorMessage('Failed to start shift. Please try again.');

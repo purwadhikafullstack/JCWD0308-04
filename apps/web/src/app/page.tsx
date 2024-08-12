@@ -3,6 +3,8 @@ import Cookies from 'js-cookie';
 import { useEffect, useState } from 'react';
 import LoginAdmin from '@/components/login/loginAdmin';
 import LoginCashier from '@/components/login/loginCashier';
+import { DialogStartShift } from '@/components/shift/dialogStartShift';
+import { DialogEndShift } from '@/components/shift/dialogEndShift';
 
 export default function Home() {
   const [isAuth, setIsAuth] = useState(false)
@@ -26,6 +28,8 @@ export default function Home() {
               illo tenetur fuga ducimus numquam ea!
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-4">
+                {isAuth && <DialogStartShift/>}
+                {isAuth && <DialogEndShift/>}
                 {!isAuth && <LoginAdmin/>}
                 {!isAuth && <LoginCashier/>}
             </div>

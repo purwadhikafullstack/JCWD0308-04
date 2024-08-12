@@ -15,6 +15,7 @@ import { fetchCashier, deleteCashier } from '@/lib/fetch';
 import { DialogEditCashier } from '@/components/cashierManagements/dialogEditCashier';
 import { Cashier } from '@/types/types';
 import Cookies from 'js-cookie';
+import { Separator } from '@/components/ui/separator';
 
 export default function CashierManagements() {
   const [cashiers, setCashiers] = useState<Cashier[]>([]);
@@ -52,38 +53,38 @@ export default function CashierManagements() {
   };
 
   return (
-    <div className="grid mx-20 flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 lg:grid-cols-1 xl:grid-cols-1">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-4xl">Cashier Managements.</CardTitle>
-          <CardDescription>
-            <DialogCreateCashier token={token} />
+    <div className="grid gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 lg:grid-cols-1 xl:grid-cols-1 mx-4 lg:mx-20">
+      <Card className="sm:col-span-2">
+        <CardHeader className="pb-3">
+          <CardTitle>Cashier Managements</CardTitle>
+          <CardDescription className="text-sm text-muted-foreground">
+            You can set and add cashiers as needed.
           </CardDescription>
-          <CardFooter>{/* <Separator/> */}</CardFooter>
         </CardHeader>
+        <CardFooter>
+          <DialogCreateCashier token={token} />
+        </CardFooter>
+      </Card>
+      <Card className="grid pt-6 sm:col-span-2">
         <CardContent className="grid gap-8">
           {cashiers.length > 0 ? (
             cashiers.map((cashier) => (
-              <div key={cashier.id} className="flex items-center gap-4">
-                <Avatar className="hidden h-9 w-9 sm:flex">
+              <div key={cashier.id} className="flex flex-col hover:bg-gray-100 cursor-pointer sm:flex-row items-center gap-4 p-4 border-b">
+                <Avatar className="h-9 w-9 sm:flex">
                   <AvatarImage src="/images/photo.jpeg" />
                 </Avatar>
-                <div className="grid gap-1">
-                  <p className="text-sm font-medium leading-none">
-                    {cashier.email}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {cashier.role}
-                  </p>
+                <div className="grid gap-1 flex-grow">
+                  <p className="text-sm font-medium leading-none">{cashier.email}</p>
+                  <p className="text-sm text-muted-foreground">{cashier.role}</p>
                 </div>
-                <div className="ml-auto font-medium">
+                <div className="mt-2 sm:mt-0 sm:ml-auto flex-shrink-0">
                   <DialogEditCashier
                     cashier={cashier}
                     token={token}
                     onCashierUpdated={handleCashierUpdated}
                   />
                 </div>
-                <div>
+                <div className="mt-2 sm:mt-0">
                   <Button
                     variant="destructive"
                     onClick={() => handleDelete(cashier.id)}
@@ -94,7 +95,7 @@ export default function CashierManagements() {
               </div>
             ))
           ) : (
-            <p>No cashiers available</p>
+            <p className="text-center text-muted-foreground">No cashiers available</p>
           )}
         </CardContent>
       </Card>

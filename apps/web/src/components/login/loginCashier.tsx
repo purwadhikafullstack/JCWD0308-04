@@ -1,13 +1,6 @@
 'use client';
 import { Button } from '@/components/ui/button';
-import { Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Cookies from 'js-cookie';
@@ -19,46 +12,46 @@ export default function LoginCashier() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const router = useRouter();
-  const {setUser} = useContext(UserContext)
+  const userContext = useContext(UserContext);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_API_URL}cashier/login`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password }),
-        },
-      );
-      if (response.ok) {
-        const data = await response.json()
-        const expires = new Date();
+    setError("");
 
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}cashier/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const expires = new Date();
         expires.setHours(expires.getHours() + 6);
         Cookies.set('token', data.token, {
           expires: expires,
           sameSite: 'Strict',
         });
 
-        setUser(data.cashierId)
-
-        router.push('/activity');
         alert('Login Success');
-
+        userContext?.setShiftId(data.cashierId); // Safe access with optional chaining
+        router.push('/');
       } else {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Login Failed');
+        setError(errorData.error || 'Login Failed');
       }
     } catch (error) {
       console.error('Login error:', error);
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-    
   };
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -68,7 +61,7 @@ export default function LoginCashier() {
         <DialogHeader>
           <DialogTitle>Login as Cashier</DialogTitle>
           <DialogDescription>
-            Make changes to your profile here. Click save when youre done.
+            Enter your credentials below to log in.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleLogin}>
@@ -101,9 +94,10 @@ export default function LoginCashier() {
               />
             </div>
           </div>
+          {error && <p className="text-red-600">{error}</p>}
           <DialogFooter>
             <Button type="submit" disabled={loading}>
-              Log In
+              {loading ? 'Logging in...' : 'Log In'}
             </Button>
           </DialogFooter>
         </form>

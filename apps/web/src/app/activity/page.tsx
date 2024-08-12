@@ -1,78 +1,130 @@
-
 'use client';
 import { useEffect, useState } from 'react';
-import RecentDetail from '@/components/shift/recentDetail';
-import { DialogEndShift } from '@/components/shift/dialogEndShift';
-import { DialogStartShift } from '@/components/shift/dialogStartShift';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useRouter } from 'next/navigation';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Transaction } from '@/types/transactionTypes';
-// import { useCashier } from '@/components/context/shiftContext';
+import Cookies from 'js-cookie';
+import { formatDateTime, formatToIDR } from '@/lib/utils';
+import RecentDetail from '@/components/shift/recentDetail';
 
 export default function Activity() {
+  const [cashierId, setCashierId] = useState<string | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [error, setError] = useState<string | null>(null);
-  // const { shiftId, setShiftId } = useCashier()
+  const [loading, setLoading] = useState(true);
+  const [selectedTransaction, setSelectedTransaction] =
+    useState<Transaction | null>(null);
+  const router = useRouter();
+  const token = Cookies.get('token');
 
-  // useEffect(() => {
-  //   const fetchTransactions = async () => {
-  //     const date = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
-  //     try {
-  //       const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}cashier/transactions/${cashierId}?date=${date}`);
-  //       if (!res.ok) {
-  //         throw new Error('Failed to fetch transactions');
-  //       }
-  //       const data: Transaction[] = await res.json();
-  //       setTransactions(data);
-  //     } catch (error: any) {
-  //       console.error('Failed to fetch transactions:', error);
-  //       setError(error.message);
-  //     }
-  //   };
+  useEffect(() => {
+    const fetchCashierId = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_API_URL}cashier/getCashierId`,
+          {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
 
-  //   if (shiftId) {
-  //     fetchTransactions();
-  //   }
-  // }, [shiftId]);
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to fetch cashier ID');
+        }
+        const data = await response.json();
+        if (!data.cashierId) {
+          throw new Error('Cashier ID not found');
+        }
+        setCashierId(data.cashierId);
+      } catch (error: any) {
+        console.error('Failed to fetch cashier ID:', error);
+        setError(error.message);
+      }
+    };
+    fetchCashierId();
+  }, [token]);
 
-  // if (error) {
-  //   return <div>Error: {error}</div>;
-  // }
+  useEffect(() => {
+    if (!cashierId) {
+      return;
+    }
+    const fetchTransactions = async () => {
+      const date = new Date().toISOString().split('T')[0];
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_API_URL}cashier/transactions/${cashierId}?date=${date}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        );
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to fetch transactions');
+        }
+        const data = await response.json();
+        setTransactions(data);
+      } catch (error: any) {
+        console.error('Failed to fetch transactions:', error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTransactions();
+  }, [cashierId, token]);
+
+  const handleTransactionClick = (transaction: Transaction) => {
+    setSelectedTransaction(transaction);
+  };
+
+  if (loading) {
+    return <div className="text-center py-4">Loading...</div>;
+  }
+  if (error) {
+    return <div className="text-center py-4 text-red-500">Error: {error}</div>;
+  }
 
   return (
-    <div className="grid flex-1 mx-20 items-start gap-4 sm:py-0 md:gap-8 lg:grid-cols-3 xl:grid-cols-3">
-      <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
-        <div className="grid grid-cols-2 items-start gap-4 sm:py-0 ">
-          <div>
-            <DialogStartShift />
-          </div>
-          <div>
-            <DialogEndShift />
-          </div>
-        </div>
+    <div className="flex flex-col mx-4 md:mx-8 lg:mx-20 gap-4 p-4 md:p-6 lg:grid lg:grid-cols-3 lg:gap-8">
+      <div className="lg:col-span-2">
         <Card>
-          <CardHeader>
-            <CardTitle>Recent Sales Current Shift</CardTitle>
+          <CardHeader className="pb-3">
+            <CardTitle>Transactions</CardTitle>
+            <CardDescription>Recent transactions for today</CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-8">
-            {transactions.map(transaction => (
-              <div key={transaction.id} className="flex items-center gap-4">
-                <Avatar className="hidden h-9 w-9 sm:flex">
-                  <AvatarImage src="/avatars/01.png" alt="Avatar" />
-                  <AvatarFallback>OM</AvatarFallback>
-                </Avatar>
-                <div className="grid gap-1">
-                  <p className="text-sm font-medium leading-none">{transaction.cashier.name}</p>
-                  <p className="text-sm text-muted-foreground">{transaction.cashier.email}</p>
+          <CardContent className="grid gap-4">
+            {transactions.map((transaction) => (
+              <div
+                key={transaction.id}
+                className="flex items-center justify-between p-4 border-b cursor-pointer"
+                onClick={() => handleTransactionClick(transaction)}
+              >
+                <div>
+                  <p className="text-sm text-muted-foreground">
+                    {formatDateTime(transaction.createdAt).dateTime}
+                  </p>
                 </div>
-                <div className="ml-auto font-medium">{`+$${transaction.totalSales}`}</div>
+                <div className="font-medium">
+                  {formatToIDR(transaction.totalPrice)}
+                </div>
               </div>
             ))}
           </CardContent>
         </Card>
       </div>
-      <div>
-        <RecentDetail transactions={transactions} />
+      <div className="lg:col-span-1">
+        {selectedTransaction && (
+          <RecentDetail transactions={selectedTransaction} />
+        )}
       </div>
     </div>
   );
