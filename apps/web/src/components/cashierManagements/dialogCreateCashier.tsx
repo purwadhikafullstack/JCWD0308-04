@@ -12,18 +12,22 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { TokenProps } from '@/types/types';
+import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
+import toast from 'react-hot-toast';
+
 
 export function DialogCreateCashier({ token }: TokenProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter()
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_API_URL}admin/createCashier`,
+        `${process.env.NEXT_PUBLIC_BASE_API_URL}admin/create-cashier`,
         {
           method: 'POST',
           headers: {
@@ -34,10 +38,11 @@ export function DialogCreateCashier({ token }: TokenProps) {
         },
       );
       if (response.ok) {
-        throw 'Cashier Created';
+        toast.success('Cashier Created');
+        window.location.reload()
       }
-    } catch (error) {
-      throw error;
+    } catch (error: any) {
+      toast.error(error);
     }
   };
   return (

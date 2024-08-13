@@ -22,7 +22,7 @@ export function DialogCreateProduct({ token }: TokenProps) {
     event.preventDefault();
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_API_URL}admin/createProduct`,
+        `${process.env.NEXT_PUBLIC_BASE_API_URL}admin/create-product`,
         {
           method: 'POST',
           headers: {

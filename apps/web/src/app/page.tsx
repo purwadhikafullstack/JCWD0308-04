@@ -7,11 +7,11 @@ import { DialogStartShift } from '@/components/shift/dialogStartShift';
 import { DialogEndShift } from '@/components/shift/dialogEndShift';
 
 export default function Home() {
-  const [isAuth, setIsAuth] = useState(false)
-  useEffect(()=>{
-    const token = Cookies.get('token')
-    setIsAuth(!!token)
-  },[])
+  const [isAuth, setIsAuth] = useState(false);
+  useEffect(() => {
+    const token = Cookies.get('token');
+    setIsAuth(!!token);
+  }, []);
   return (
     <div className="">
       <section className="bg-gray-50">
@@ -24,14 +24,13 @@ export default function Home() {
               </strong>
             </h1>
             <p className="mt-4 sm:text-xl/relaxed">
-              Lorem ipsum dolor sit amet consectetur, adipisicing elit. Nesciunt
-              illo tenetur fuga ducimus numquam ea!
+              Streamline Sales, Elevate Success.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-4">
-                {isAuth && <DialogStartShift/>}
-                {isAuth && <DialogEndShift/>}
-                {!isAuth && <LoginAdmin/>}
-                {!isAuth && <LoginCashier/>}
+              {isAuth && <DialogStartShift />}
+              {isAuth && <DialogEndShift />}
+              {!isAuth && <LoginAdmin />}
+              {!isAuth && <LoginCashier />}
             </div>
           </div>
         </div>

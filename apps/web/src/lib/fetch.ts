@@ -39,11 +39,31 @@ export const deleteProduct = async (
   }
   return response.status === 200;
 };
+// fetch delete cashier
+export const deleteCashier = async (
+  cashierId: number,
+  token: string,
+): Promise<boolean> => {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_API_URL}admin/delete-cashier/${cashierId}`,
+    {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+  if (!response.ok) {
+    throw new Error('Failed to delete cashier');
+  }
+  return response.status === 200;
+};
 // fetch get cashier
 export const fetchCashier = async (token: string): Promise<Cashier[]> => {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_API_URL}admin/getCashier`,
+      `${process.env.NEXT_PUBLIC_BASE_API_URL}admin/get-cashier`,
       {
         method: 'GET',
         headers: {
@@ -61,31 +81,11 @@ export const fetchCashier = async (token: string): Promise<Cashier[]> => {
     throw error;
   }
 };
-// fetch delete cashier
-export const deleteCashier = async (
-  cashierId: number,
-  token: string,
-): Promise<boolean> => {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_API_URL}admin/deleteCashier/${cashierId}`,
-    {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-    },
-  );
-  if (!response.ok) {
-    throw new Error('Failed to delete cashier');
-  }
-  return response.status === 200;
-};
 // fetch Get Product admin
 export const getProduct = async (token: string) => {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_API_URL}admin/getProduct`,
+      `${process.env.NEXT_PUBLIC_BASE_API_URL}admin/get-product`,
       {
         method: 'GET',
         headers: {
@@ -112,7 +112,7 @@ export async function updateCashier(
   token: string,
 ): Promise<Cashier> {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_API_URL}admin/updateCashier/${id}`,
+    `${process.env.NEXT_PUBLIC_BASE_API_URL}admin/update-cashier/${id}`,
     {
       method: 'PUT',
       headers: {
@@ -171,5 +171,18 @@ export async function endShift(
   );
   if (!response.ok) {
     throw new Error('Failed to end shift');
+  }
+}
+// Get Role
+export const getRole = async (token: string) => {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}account/get-role`, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${token}`}
+    })
+    const data = await response.json()
+    return data.role
+  } catch (error) {
+    console.error('Error fetching Role')
   }
 }

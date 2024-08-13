@@ -1,27 +1,14 @@
 'use client';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from '@/components/ui/table';
 import { formatToIDR } from '@/lib/utils';
-import { DialogEditProducts } from '@/components/productManagements/dialogEditProduct';
 import { deleteProduct, getProduct } from '@/lib/fetch';
-import { Product } from '@/types/types';
 import { Button } from '@/components/ui/button';
 import { DialogCreateProduct } from '@/components/productManagements/dialogCreateProduct';
+import { DialogEditProducts } from '@/components/productManagements/dialogEditProduct';
+import { Product } from '@/types/types';
 import Cookies from 'js-cookie';
 
 export default function ProductManagements() {
@@ -45,6 +32,7 @@ export default function ProductManagements() {
       const success = await deleteProduct(productId, token);
       if (success) {
         setProducts(products.filter((product) => product.id !== productId));
+        handleProductUpdated()
       }
     } catch (error) {
       console.error('Error deleting product', error);

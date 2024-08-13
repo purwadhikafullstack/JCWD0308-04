@@ -20,7 +20,7 @@ export class CashierControllers {
                 return res.status(401).json({ error: 'Invalid Password' });
             }
             const payload = {id: cashier.id, email: cashier.email, role: cashier.role}
-            const token = sign(payload, process.env.KEY_JWT!, {expiresIn: '1h'})
+            const token = sign(payload, process.env.KEY_JWT!, {expiresIn: '6h'})
             const role  = cashier.role
             const cashierId = cashier.id
 
@@ -29,6 +29,7 @@ export class CashierControllers {
             res.status(500).json({error: 'Internal Server Error'})
         }
     }
+    
     async GetShiftId(req: Request, res: Response) {
       try {
           const cashierId = req.user.id;
@@ -47,7 +48,7 @@ export class CashierControllers {
           console.error('Error retrieving shift ID:', error);
           res.status(500).json({ error: 'Internal Server Error' });
       }
-  }
+    } 
     async getCashierId(req: Request, res: Response) {
         try {
           const userId = req.user.id;

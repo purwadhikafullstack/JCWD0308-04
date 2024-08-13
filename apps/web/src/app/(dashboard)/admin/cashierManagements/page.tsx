@@ -1,21 +1,13 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { DialogCreateCashier } from '@/components/cashierManagements/dialogCreateCashier';
 import { Avatar, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from '@/components/ui/card';
 import { fetchCashier, deleteCashier } from '@/lib/fetch';
+import { Button } from '@/components/ui/button';
+import { DialogCreateCashier } from '@/components/cashierManagements/dialogCreateCashier';
 import { DialogEditCashier } from '@/components/cashierManagements/dialogEditCashier';
 import { Cashier } from '@/types/types';
 import Cookies from 'js-cookie';
-import { Separator } from '@/components/ui/separator';
 
 export default function CashierManagements() {
   const [cashiers, setCashiers] = useState<Cashier[]>([]);

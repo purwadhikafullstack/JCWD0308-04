@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { Request, Response } from 'express';
+import { Request, Response, Router } from 'express';
 import { sign } from 'jsonwebtoken';
 import { compare, hash } from 'bcrypt';
 
@@ -19,10 +19,34 @@ export class AdminControllers {
         return res.status(401).json({ error: 'Invalid Password' });
       }
       const payload = { id: admin.id, email: admin.email, role: admin.role };
-      const token = sign(payload, process.env.KEY_JWT!, { expiresIn: '1h' });
+      const token = sign(payload, process.env.KEY_JWT!, { expiresIn: '6h' });
       const role = admin.role;
       const adminId = admin.id;
       res.status(200).json({ token, role, adminId });
+    } catch (error) {
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  }
+  async GetRole(req: Request, res: Response) {
+    try {
+      if (!req.user || !req.user.role) {
+        return res.status(401).json({ error: 'User role not found' });
+      }
+      const role = req.user.role;
+      let userData;
+
+      if (role === 'admin') {
+        userData = await prisma.admin.findUnique({
+          where: { id: req.user.id },
+        });
+      } else if (role === 'cashier') {
+        userData = await prisma.cashier.findUnique({
+          where: { id: req.user.id },
+        });
+      } else {
+        return res.status(400).json({ error: 'Invalid role' });
+      }
+      res.status(200).json({ role });
     } catch (error) {
       res.status(500).json({ error: 'Internal Server Error' });
     }
@@ -127,22 +151,13 @@ export class AdminControllers {
   async deleteProduct(req: Request, res: Response) {
     try {
       const id = req.params.id;
+      await prisma.transactionProduct.deleteMany({ where: { productId: +id } });
+
       await prisma.product.delete({ where: { id: parseInt(id) } });
-      res.status(204).send();
+      res.status(204).send({ message: 'ok' });
     } catch (error) {
-      res.status(500).json({ error: 'Internal Server Error' });
-    }
-  }
-  async adjustStock(req: Request, res: Response) {
-    try {
-      const { id } = req.params;
-      const { adjustment } = req.body; // positive or negative value
-      const updatedProduct = await prisma.product.update({
-        where: { id: parseInt(id) },
-        data: { stock: { increment: adjustment } },
-      });
-      res.status(200).json(updatedProduct);
-    } catch (error) {
+      console.log(error);
+
       res.status(500).json({ error: 'Internal Server Error' });
     }
   }
@@ -285,7 +300,7 @@ export class AdminControllers {
             email: shift.cashier.email,
           },
           startAmount: shift.startAmount,
-          endAmount: shift.endAmount, 
+          endAmount: shift.endAmount,
           createdAt: shift.endTime,
           totalSales,
           transactions: shift.Transaction.map((transaction) => ({
@@ -309,7 +324,7 @@ export class AdminControllers {
           amount: true,
         },
       });
-  
+
       res.status(200).json({ totalSales: totalSales._sum.amount || 0 });
     } catch (error) {
       console.error('Error fetching total sales:', error);

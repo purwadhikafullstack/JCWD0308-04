@@ -44,7 +44,7 @@ export function DialogEditProducts({
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_API_URL}/admin/updateProduct/${product?.id}`,
+        `${process.env.NEXT_PUBLIC_BASE_API_URL}/admin/update-product/${product?.id}`,
         {
           method: 'PUT',
           headers: {

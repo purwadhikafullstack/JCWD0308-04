@@ -25,7 +25,7 @@ export default function RecentShift() {
       const date = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_API_URL}admin/getConsolidatedDailySalesReport?date=${date}`,
+          `${process.env.NEXT_PUBLIC_BASE_API_URL}admin/consolidated-daily-sales-report?date=${date}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           },
