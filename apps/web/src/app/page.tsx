@@ -1,95 +1,66 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+'use client';
+import Cookies from 'js-cookie';
+import { useEffect, useState } from 'react';
+import LoginAdmin from '@/components/login/loginAdmin';
+import LoginCashier from '@/components/login/loginCashier';
+import { DialogStartShift } from '@/components/shift/dialogStartShift';
+import { DialogEndShift } from '@/components/shift/dialogEndShift';
 
 export default function Home() {
+  const [role, setRole] = useState<string | null>(null);
+  const [isAuth, setIsAuth] = useState(false);
+
+  useEffect(() => {
+    const token = Cookies.get('token');
+    const getRole = async () => {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_API_URL}account/get-role`,
+        {
+          method: 'GET',
+          headers: { Authorization: `${token}` },
+        },
+      );
+      const data = await response.json();
+      setRole(data.role);
+    };
+    if (token) {
+      setIsAuth(true);
+    } else {
+      setIsAuth(false);
+    }
+    getRole();
+  }, []);
+  
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <div className="">
+      <section className="bg-gray-50">
+        <div className="mx-auto max-w-screen-xl px-4 py-32 lg:flex lg:h-screen lg:items-center">
+          <div className="mx-auto max-w-xl text-center">
+            <h1 className="text-3xl font-extrabold sm:text-5xl">
+              Corner.
+              <strong className="font-extrabold text-red-700 sm:block">
+                Point Of Sales.
+              </strong>
+            </h1>
+            <p className="mt-4 sm:text-xl/relaxed">
+              Streamline Sales, Elevate Success.
+            </p>
+            <div className="mt-8 flex flex-wrap justify-center gap-4">
+              {isAuth && role == 'cashier' ? (
+                <>
+                  <DialogStartShift />
+                  <DialogEndShift />
+                </>
+              ) : (
+                <>
+                  {!isAuth && <LoginAdmin />}
+                  {!isAuth && <LoginCashier />}
+                </>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+      </section>
+    </div>
+  );
 }
