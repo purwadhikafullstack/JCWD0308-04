@@ -13,9 +13,10 @@ import { Label } from '@/components/ui/label';
 import { useState } from 'react';
 import { updateCashier } from '@/lib/fetch';
 import { DialogEditCashierProps } from '@/types/types';
+import toast from 'react-hot-toast';
 
 export function DialogEditCashier({
-  cashier,
+  cashier = {id: 0, email: '', role: ''} ,
   token,
   onCashierUpdated,
 }: DialogEditCashierProps) {
@@ -33,7 +34,8 @@ export function DialogEditCashier({
         newPassword,
         token,
       );
-      onCashierUpdated(updatedCashier);
+      toast.success('Cashier Edited!', {duration: 4000})
+      onCashierUpdated();
     } catch (error) {
       console.error('Error updating cashier', error);
     }

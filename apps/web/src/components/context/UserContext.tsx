@@ -19,7 +19,7 @@ export function UserContextProvider({ children }: UserContextProviderProps) {
 
   const getShiftID = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/cashier/getShiftId', {
+      const response = await fetch('http://localhost:8000/api/cashier/get-shiftId', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,

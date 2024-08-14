@@ -7,6 +7,8 @@ import Cookies from 'js-cookie';
 import { useContext, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { UserContext } from '../context/UserContext';
+import { createToken } from '@/app/action';
+import toast from 'react-hot-toast';
 
 export default function LoginCashier() {
   const [email, setEmail] = useState('');
@@ -31,18 +33,21 @@ export default function LoginCashier() {
       if (response.ok) {
         const data = await response.json();
         const expires = new Date();
+
         expires.setHours(expires.getHours() + 6);
+        await createToken(data.token)
         Cookies.set('token', data.token, {
           expires: expires,
           sameSite: 'Strict',
         });
 
-        alert('Login Success');
-        userContext?.setShiftId(data.cashierId); // Safe access with optional chaining
+        toast.success('Login Success')
+        userContext?.setShiftId(data.cashierId); 
+        window.location.reload()
         router.push('/');
       } else {
         const errorData = await response.json();
-        setError(errorData.error || 'Login Failed');
+        toast.error(errorData.error || 'Login Failed');
       }
     } catch (error) {
       console.error('Login error:', error);

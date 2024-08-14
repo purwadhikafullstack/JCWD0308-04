@@ -1,28 +1,16 @@
 'use client';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from '@/components/ui/table';
 import { formatToIDR } from '@/lib/utils';
-import { DialogEditProducts } from '@/components/productManagements/dialogEditProduct';
 import { deleteProduct, getProduct } from '@/lib/fetch';
-import { Product } from '@/types/types';
 import { Button } from '@/components/ui/button';
 import { DialogCreateProduct } from '@/components/productManagements/dialogCreateProduct';
+import { DialogEditProducts } from '@/components/productManagements/dialogEditProduct';
+import { Product } from '@/types/types';
 import Cookies from 'js-cookie';
+import toast from 'react-hot-toast';
 
 export default function ProductManagements() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -46,8 +34,10 @@ export default function ProductManagements() {
       if (success) {
         setProducts(products.filter((product) => product.id !== productId));
       }
-    } catch (error) {
-      console.error('Error deleting product', error);
+      toast.success('Product Deleted')
+      handleProductUpdated()
+    } catch (error : any) {
+      toast.error(error)
     }
   };
 
@@ -66,7 +56,7 @@ export default function ProductManagements() {
         <CardHeader className="pb-2">
           <CardTitle className="text-2xl sm:text-4xl">Product Managements</CardTitle>
           <CardDescription>
-            <DialogCreateProduct token={token} />
+            <DialogCreateProduct onProductUpdated={handleProductUpdated} token={token} />
           </CardDescription>
         </CardHeader>
         <CardContent>

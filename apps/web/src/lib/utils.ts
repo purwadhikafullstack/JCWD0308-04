@@ -5,10 +5,12 @@ import Cookies from "js-cookie"
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
+// isAuth
 export const isAuth = () => {
   const token = Cookies.get('token')
   return !!token
 }
+// format IDR
 export function formatToIDR(amount: number) {
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
@@ -17,6 +19,7 @@ export function formatToIDR(amount: number) {
     maximumFractionDigits: 0
   }).format(amount);
 }
+// format Date
 export const formatDateTime = (dateString: Date) => {
   const dateTimeOptions: Intl.DateTimeFormatOptions = {
     weekday: 'short', // abbreviated weekday name (e.g., 'Mon')

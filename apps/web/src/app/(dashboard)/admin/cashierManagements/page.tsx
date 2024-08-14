@@ -1,21 +1,14 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { DialogCreateCashier } from '@/components/cashierManagements/dialogCreateCashier';
 import { Avatar, AvatarImage } from '@/components/ui/avatar';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from '@/components/ui/card';
+import { getCashier, deleteCashier } from '@/lib/fetch';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { fetchCashier, deleteCashier } from '@/lib/fetch';
+import { DialogCreateCashier } from '@/components/cashierManagements/dialogCreateCashier';
 import { DialogEditCashier } from '@/components/cashierManagements/dialogEditCashier';
 import { Cashier } from '@/types/types';
 import Cookies from 'js-cookie';
-import { Separator } from '@/components/ui/separator';
+import toast from 'react-hot-toast';
 
 export default function CashierManagements() {
   const [cashiers, setCashiers] = useState<Cashier[]>([]);
@@ -24,7 +17,7 @@ export default function CashierManagements() {
   useEffect(() => {
     const loadCashiers = async () => {
       try {
-        const data = await fetchCashier(token);
+        const data = await getCashier(token);
         setCashiers(data);
       } catch (error) {
         console.error('Error loading cashiers', error);
@@ -39,17 +32,20 @@ export default function CashierManagements() {
       if (success) {
         setCashiers(cashiers.filter((cashier) => cashier.id !== cashierId));
       }
+      toast('Cashier Deleted', {duration: 4000})
+      handleCasierUpdated()
     } catch (error) {
       console.error('Error deleting cashier', error);
     }
   };
-
-  const handleCashierUpdated = (updatedCashier: Cashier) => {
-    setCashiers((prevCashiers) =>
-      prevCashiers.map((cashier) =>
-        cashier.id === updatedCashier.id ? updatedCashier : cashier,
-      ),
-    );
+  
+  const handleCasierUpdated = async () => {
+    try {
+      const data = await getCashier(token);
+      setCashiers(data);
+    } catch (error) {
+      console.error('Error refreshing cashier', error);
+    }
   };
 
   return (
@@ -62,7 +58,7 @@ export default function CashierManagements() {
           </CardDescription>
         </CardHeader>
         <CardFooter>
-          <DialogCreateCashier token={token} />
+          <DialogCreateCashier onCashierUpdated={handleCasierUpdated} token={token} />
         </CardFooter>
       </Card>
       <Card className="grid pt-6 sm:col-span-2">
@@ -81,7 +77,7 @@ export default function CashierManagements() {
                   <DialogEditCashier
                     cashier={cashier}
                     token={token}
-                    onCashierUpdated={handleCashierUpdated}
+                    onCashierUpdated={handleCasierUpdated}
                   />
                 </div>
                 <div className="mt-2 sm:mt-0">

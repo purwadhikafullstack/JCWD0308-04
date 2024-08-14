@@ -21,8 +21,8 @@ export class CashierRouter{
         this.router.post('/transactions', this.userMiddleware.verifyToken, this.cashierControllers.Transaction) // done
         this.router.get('/transactions/:cashierId', this.userMiddleware.verifyToken, this.cashierControllers.GetDailyTransactions) //done
         this.router.get('/products', this.cashierControllers.GetProducts) //done
-        this.router.post('/getShiftId', this.userMiddleware.verifyToken, this.cashierControllers.GetShiftId) //done
-        this.router.get('/getCashierId', this.userMiddleware.verifyToken, this.cashierControllers.getCashierId) //done
+        this.router.post('/get-shiftId', this.userMiddleware.verifyToken, this.cashierControllers.GetShiftId) //done
+        this.router.get('/get-cashierId', this.userMiddleware.verifyToken, this.cashierControllers.getCashierId) //done
     }
     getRouter()  {
         return this.router

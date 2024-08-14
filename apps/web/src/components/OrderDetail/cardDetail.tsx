@@ -9,6 +9,7 @@ import { CardDetailProps } from '@/types/types';
 import { useContext, useState } from 'react';
 import Cookies from 'js-cookie';
 import { UserContext } from '../context/UserContext';
+import toast from 'react-hot-toast';
 
 export default function CardDetail({
   selectedProducts,
@@ -19,10 +20,7 @@ export default function CardDetail({
   const [amountPaid, setAmountPaid] = useState<number>(0);
   const [cardNumber, setCardNumber] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Use context with type guard
   const context = useContext(UserContext);
   if (!context) {
     throw new Error('UserContext is undefined. Ensure it is used within a UserContextProvider.');
@@ -46,23 +44,25 @@ export default function CardDetail({
     0,
   );
 
+  const change = amountPaid - totalAmount;
+
   const handleSubmit = async () => {
     if (!shiftId) {
-      setErrorMessage('Shift ID is missing. Please start your shift.');
+      toast.error('Shift doesn\'t start. Please start your shift.', { duration: 4000 });
       return;
     }
-
     if (amountPaid < totalAmount) {
-      setErrorMessage('Amount paid cannot be less than the total amount.');
+      toast.error('Amount paid cannot be less than the total amount.', { duration: 4000 });
       return;
     }
-
+    if (paymentMethod === 'card' && !cardNumber) {
+      toast.error('Please enter the card number.', { duration: 4000 });
+      return;
+    }
+  
     setIsSubmitting(true);
-    setErrorMessage(null);
-    setSuccessMessage(null);
-
+  
     const token = Cookies.get('token');
-
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_API_URL}cashier/transactions`,
@@ -79,22 +79,24 @@ export default function CardDetail({
             amountPaid,
             cardNumber: paymentMethod === 'card' ? cardNumber : null,
           }),
-        },
+        }
       );
-
+  
       if (!response.ok) {
-        throw new Error('Failed to create transaction.');
+        toast.error('Failed to create transaction.');
+      } else {
+        toast.success('Transaction successful!', { duration: 4000 })
+        setSelectedProducts([]);
+        setCardNumber('');
+        setAmountPaid(0);
       }
-
-      setSuccessMessage('Transaction created successfully!');
-      setSelectedProducts([]); // Clear selected products after successful transaction
     } catch (error) {
-      console.error('Error creating transaction:', error);
-      setErrorMessage('Failed to create transaction. Please try again.');
-    } finally {
-      setIsSubmitting(false);
+      toast.error('Failed to create transaction. Please try again.', { duration: 4000 });
     }
+    setIsSubmitting(false);
   };
+  
+  
 
   return (
     <Card className="overflow-hidden">
@@ -149,6 +151,12 @@ export default function CardDetail({
               <span className="text-muted-foreground">Total</span>
               <span>{formatToIDR(totalAmount)}</span>
             </li>
+            {paymentMethod === 'cash' && change >= 0 && (
+              <li className="flex items-center justify-between font-semibold">
+                <span className="text-muted-foreground">Change</span>
+                <span>{formatToIDR(change)}</span>
+              </li>
+            )}
           </ul>
         </div>
         <Separator className="my-4" />
@@ -191,12 +199,6 @@ export default function CardDetail({
             />
           </div>
         </div>
-        {errorMessage && (
-          <div className="text-red-500 text-sm mt-2">{errorMessage}</div>
-        )}
-        {successMessage && (
-          <div className="text-green-500 text-sm mt-2">{successMessage}</div>
-        )}
         <Separator className="my-4" />
         <Button type="button" onClick={handleSubmit} disabled={isSubmitting}>
           {isSubmitting ? 'Submitting...' : 'Create Transaction'}

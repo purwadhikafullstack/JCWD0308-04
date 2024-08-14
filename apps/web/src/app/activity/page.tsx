@@ -12,6 +12,8 @@ import { Transaction } from '@/types/transactionTypes';
 import Cookies from 'js-cookie';
 import { formatDateTime, formatToIDR } from '@/lib/utils';
 import RecentDetail from '@/components/shift/recentDetail';
+import { DialogStartShift } from '@/components/shift/dialogStartShift';
+import { DialogEndShift } from '@/components/shift/dialogEndShift';
 
 export default function Activity() {
   const [cashierId, setCashierId] = useState<string | null>(null);
@@ -27,7 +29,7 @@ export default function Activity() {
     const fetchCashierId = async () => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_API_URL}cashier/getCashierId`,
+          `${process.env.NEXT_PUBLIC_BASE_API_URL}cashier/get-cashierId`,
           {
             method: 'GET',
             headers: {

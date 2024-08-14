@@ -70,7 +70,7 @@ export default function RecentDetail({ shiftReport }: ShiftReportProps) {
                 className="flex items-center justify-between"
               >
                 <span className="text-muted-foreground">
-                  {transaction.transactionProducts[0].product.name} x{' '}
+                  {transaction.transactionProducts[0].product.name} x {' '}
                   {transaction.transactionProducts[0].quantity}
                 </span>
                 <span>

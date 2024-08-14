@@ -1,9 +1,7 @@
 'use client'
-
 import { useEffect, useState } from 'react';
-import Cookies from 'js-cookie';
-import { Progress } from "@radix-ui/react-progress";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
+import Cookies from 'js-cookie'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { formatToIDR } from '@/lib/utils';
 
 export default function CardReportSales() {
@@ -57,11 +55,6 @@ export default function CardReportSales() {
                         From all transactions
                     </div>
                 </CardContent>
-                <CardFooter>
-                    {totalSales !== null && (
-                        <Progress value={totalSales / 100} aria-label="Total Sales Progress" />
-                    )}
-                </CardFooter>
             </Card>
 
             <Card x-chunk="dashboard-05-chunk-1">
@@ -76,11 +69,6 @@ export default function CardReportSales() {
                         From all card transactions
                     </div>
                 </CardContent>
-                <CardFooter>
-                    {totalCardSales !== null && (
-                        <Progress value={totalCardSales / 100} aria-label="Card Payment Progress" />
-                    )}
-                </CardFooter>
             </Card>
 
             <Card x-chunk="dashboard-05-chunk-1">
@@ -95,11 +83,6 @@ export default function CardReportSales() {
                         From all cash transactions
                     </div>
                 </CardContent>
-                <CardFooter>
-                    {totalCashSales !== null && (
-                        <Progress value={totalCashSales / 100} aria-label="Cash Payment Progress" />
-                    )}
-                </CardFooter>
             </Card>
         </div>
     );

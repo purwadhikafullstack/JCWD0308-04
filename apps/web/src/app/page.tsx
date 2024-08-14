@@ -7,11 +7,29 @@ import { DialogStartShift } from '@/components/shift/dialogStartShift';
 import { DialogEndShift } from '@/components/shift/dialogEndShift';
 
 export default function Home() {
-  const [isAuth, setIsAuth] = useState(false)
-  useEffect(()=>{
-    const token = Cookies.get('token')
-    setIsAuth(!!token)
-  },[])
+  const [role, setRole] = useState<string | null>(null);
+  const [isAuth, setIsAuth] = useState(false);
+
+  useEffect(() => {
+    const token = Cookies.get('token');
+    const getRole = async () => {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_API_URL}account/get-role`,
+        {
+          method: 'GET',
+          headers: { Authorization: `${token}` },
+        },
+      );
+      const data = await response.json();
+      setRole(data.role);
+    };
+    if (token) {
+      setIsAuth(true);
+    } else {
+      setIsAuth(false);
+    }
+    getRole();
+  }, []);
   return (
     <div className="">
       <section className="bg-gray-50">
@@ -24,14 +42,20 @@ export default function Home() {
               </strong>
             </h1>
             <p className="mt-4 sm:text-xl/relaxed">
-              Lorem ipsum dolor sit amet consectetur, adipisicing elit. Nesciunt
-              illo tenetur fuga ducimus numquam ea!
+              Streamline Sales, Elevate Success.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-4">
-                {isAuth && <DialogStartShift/>}
-                {isAuth && <DialogEndShift/>}
-                {!isAuth && <LoginAdmin/>}
-                {!isAuth && <LoginCashier/>}
+              {isAuth && role == 'cashier' ? (
+                <>
+                  <DialogStartShift />
+                  <DialogEndShift />
+                </>
+              ) : (
+                <>
+                  {!isAuth && <LoginAdmin />}
+                  {!isAuth && <LoginCashier />}
+                </>
+              )}
             </div>
           </div>
         </div>
