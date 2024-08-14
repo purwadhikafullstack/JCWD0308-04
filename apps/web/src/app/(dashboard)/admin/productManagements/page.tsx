@@ -39,7 +39,7 @@ export default function ProductManagements() {
               handleProductUpdated();
             }
           });
-      } catch (error: any) {
+      } catch (error) {
         toast.error('Error deleting product');
         console.error('Error deleting product', error);
       }

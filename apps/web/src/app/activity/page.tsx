@@ -42,9 +42,8 @@ export default function Activity() {
           throw new Error('Cashier ID not found');
         }
         setCashierId(data.cashierId);
-      } catch (error: any) {
+      } catch (error) {
         console.error('Failed to fetch cashier ID:', error);
-        setError(error.message);
       }
     };
     fetchCashierId();
@@ -69,9 +68,8 @@ export default function Activity() {
         }
         const data = await response.json();
         setTransactions(data);
-      } catch (error: any) {
+      } catch (error) {
         console.error('Failed to fetch transactions:', error);
-        setError(error.message);
       } finally {
         setLoading(false);
       }

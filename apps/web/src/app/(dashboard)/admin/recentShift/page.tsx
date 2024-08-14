@@ -34,9 +34,8 @@ export default function RecentShift() {
         }
         const data = await res.json();
         setShiftReport(data);
-      } catch (error: any) {
+      } catch (error) {
         console.error('Failed to fetch report:', error);
-        setError(error.message);
       }
     };
     fetchReport();
