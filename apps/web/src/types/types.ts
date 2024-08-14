@@ -57,6 +57,7 @@ export interface Payment {
   id: string;
   method: string;
   amount: number;
+  change: number
 }
 export interface TransactionProduct {
   id: string;
