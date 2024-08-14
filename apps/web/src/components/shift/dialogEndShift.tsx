@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { fetchCurrentShift, endShift } from '@/lib/fetch'
+import toast from 'react-hot-toast';
 
 export function DialogEndShift() {
   const [currentShiftId, setCurrentShiftId] = useState<number | null>(null);
@@ -21,11 +22,13 @@ export function DialogEndShift() {
     };
     fetchShift();
   }, []);
+
   const handleSubmit = async () => {
     if (currentShiftId === null || !endAmount) return;
     setIsSubmitting(true);
     try {
       await endShift(currentShiftId, parseFloat(endAmount))
+      toast.success('Shift Ended!', {duration: 4000})
     } catch (error) {
       console.error("Error ending shift:", error);
     } 

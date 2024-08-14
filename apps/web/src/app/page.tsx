@@ -7,10 +7,28 @@ import { DialogStartShift } from '@/components/shift/dialogStartShift';
 import { DialogEndShift } from '@/components/shift/dialogEndShift';
 
 export default function Home() {
+  const [role, setRole] = useState<string | null>(null);
   const [isAuth, setIsAuth] = useState(false);
+
   useEffect(() => {
     const token = Cookies.get('token');
-    setIsAuth(!!token);
+    const getRole = async () => {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_API_URL}account/get-role`,
+        {
+          method: 'GET',
+          headers: { Authorization: `${token}` },
+        },
+      );
+      const data = await response.json();
+      setRole(data.role);
+    };
+    if (token) {
+      setIsAuth(true);
+    } else {
+      setIsAuth(false);
+    }
+    getRole();
   }, []);
   return (
     <div className="">
@@ -27,10 +45,17 @@ export default function Home() {
               Streamline Sales, Elevate Success.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-4">
-              {isAuth && <DialogStartShift />}
-              {isAuth && <DialogEndShift />}
-              {!isAuth && <LoginAdmin />}
-              {!isAuth && <LoginCashier />}
+              {isAuth && role == 'cashier' ? (
+                <>
+                  <DialogStartShift />
+                  <DialogEndShift />
+                </>
+              ) : (
+                <>
+                  {!isAuth && <LoginAdmin />}
+                  {!isAuth && <LoginCashier />}
+                </>
+              )}
             </div>
           </div>
         </div>

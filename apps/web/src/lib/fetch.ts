@@ -10,7 +10,6 @@ export const fetchProducts = async (token: string): Promise<Product[]> => {
         'Content-Type': 'application/json',
         Authorization: `Baerer ${token}`,
       },
-      // next: {tags: ['products']}
       cache: 'no-cache',
     },
   );
@@ -60,7 +59,7 @@ export const deleteCashier = async (
   return response.status === 200;
 };
 // fetch get cashier
-export const fetchCashier = async (token: string): Promise<Cashier[]> => {
+export const getCashier = async (token: string): Promise<Cashier[]> => {
   try {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BASE_API_URL}admin/get-cashier`,
@@ -130,6 +129,7 @@ export async function updateCashier(
 
   return response.json();
 }
+
 // Fetch current shift
 export async function fetchCurrentShift(): Promise<{ id: number }> {
   const token = Cookies.get('token');
@@ -176,13 +176,16 @@ export async function endShift(
 // Get Role
 export const getRole = async (token: string) => {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}account/get-role`, {
-      method: 'GET',
-      headers: { Authorization: `Bearer ${token}`}
-    })
-    const data = await response.json()
-    return data.role
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_API_URL}account/get-role`,
+      {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
+    const data = await response.json();
+    return data.role;
   } catch (error) {
-    console.error('Error fetching Role')
+    console.error('Error fetching Role');
   }
-}
+};

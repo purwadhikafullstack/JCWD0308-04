@@ -9,6 +9,7 @@ import { formatToIDR } from '@/lib/utils';
 import CardDetail from '@/components/OrderDetail/cardDetail';
 import Cookies from 'js-cookie';
 import { Product } from '@/types/types';
+import toast from 'react-hot-toast';
 
 export default function Orders() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -35,7 +36,7 @@ export default function Orders() {
         console.error('Error checking shift status:', error);
       }
     };
-    const loadProducts = async () => {
+    const handleProductUpdated = async () => {
       try {
         const data = await fetchProducts(token);
         setProducts(data);
@@ -46,11 +47,12 @@ export default function Orders() {
       }
     };
     checkShiftStatus();
-    loadProducts();
+    handleProductUpdated();
   }, [token]);
 
   useEffect(() => {
     if (!shiftStarted && !isLoading) {
+      toast.error('Shift must be started!', {duration: 4000})
       router.push('/');
     }
   }, [shiftStarted, isLoading, router]);

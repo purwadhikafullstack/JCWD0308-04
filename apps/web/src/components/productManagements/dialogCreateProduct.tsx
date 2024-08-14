@@ -1,4 +1,4 @@
-import { TokenProps } from '@/types/types';
+import { DialogCreateProductsProps } from '@/types/types';
 import { FormEvent, useState } from 'react';
 import {
   Dialog,
@@ -12,8 +12,12 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import toast from 'react-hot-toast';
 
-export function DialogCreateProduct({ token }: TokenProps) {
+export function DialogCreateProduct({
+  token,
+  onProductUpdated,
+}: DialogCreateProductsProps) {
   const [name, setName] = useState('');
   const [stock, setStock] = useState('');
   const [price, setPrice] = useState('');
@@ -37,12 +41,14 @@ export function DialogCreateProduct({ token }: TokenProps) {
         },
       );
       if (response.ok) {
-        throw 'Product Created';
+        toast.success('Product Created', { duration: 4000 });
       }
-    } catch (error) {
-      throw error;
+      onProductUpdated();
+    } catch (error: any) {
+      toast.error(error, {duration: 4000});
     }
   };
+
   return (
     <Dialog>
       <DialogTrigger asChild>

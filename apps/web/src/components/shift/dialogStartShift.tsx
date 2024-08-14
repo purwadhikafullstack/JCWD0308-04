@@ -5,23 +5,20 @@ import { Label } from "@/components/ui/label";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 export function DialogStartShift() {
   const [startAmount, setStartAmount] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const router = useRouter()
 
   const handleSubmit = async () => {
     const token = Cookies.get('token');
     if (!startAmount || isNaN(Number(startAmount))) {
-      setErrorMessage('Please enter a valid amount.');
+      toast.error('Please enter a valid amount.', {duration: 4000});
       return;
     }
     setIsSubmitting(true);
-    setErrorMessage(null);
-    setSuccessMessage(null);
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}/cashier/start-shift`, {
         method: 'POST',
@@ -36,14 +33,11 @@ export function DialogStartShift() {
         throw new Error('Failed to start shift.');
       }
 
-      setSuccessMessage('Shift started successfully!');
+      toast.success('Shift started!', {duration: 4000});
       setStartAmount('');
       router.push("/orders")
     } catch (error) {
-      console.error("Error starting shift:", error);
-      setErrorMessage('Failed to start shift. Please try again.');
-    } finally {
-      setIsSubmitting(false);
+      toast.error('Failed to start shift. Please try again.', {duration: 4000});
     }
   };
 
@@ -73,12 +67,6 @@ export function DialogStartShift() {
             />
           </div>
         </div>
-        {errorMessage && (
-          <div className="text-red-500 text-sm mt-2">{errorMessage}</div>
-        )}
-        {successMessage && (
-          <div className="text-green-500 text-sm mt-2">{successMessage}</div>
-        )}
         <DialogFooter>
           <Button type="button" onClick={handleSubmit} disabled={isSubmitting}>
             {isSubmitting ? 'Submitting...' : 'Start Shift'}

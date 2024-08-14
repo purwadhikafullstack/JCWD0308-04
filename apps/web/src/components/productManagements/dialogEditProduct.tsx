@@ -1,17 +1,10 @@
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { DialogEditProductsProps } from '@/types/types';
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 
 export function DialogEditProducts({
   product,
@@ -21,8 +14,6 @@ export function DialogEditProducts({
   const [name, setName] = useState('');
   const [stock, setStock] = useState('');
   const [price, setPrice] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     if (product) {
@@ -34,14 +25,10 @@ export function DialogEditProducts({
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    setError(null);
-    setSuccess(null);
-
     if (!name || !stock || !price) {
-      setError('All fields are required');
+      toast('All fields are required', { duration: 4000 });
       return;
     }
-
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_API_URL}/admin/update-product/${product?.id}`,
@@ -59,20 +46,17 @@ export function DialogEditProducts({
         },
       );
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to update product');
+      if (response.ok) {
+        toast.success(`Product Edited`, { duration: 4000 });
       }
-
-      setSuccess('Product updated successfully');
-      onProductUpdated(); // callback to refresh product list
-    } catch (error: any) {
-      setError(error.message);
+      onProductUpdated();
+    } catch (error) {
+      toast.error('Failed to Edit Product', { duration: 4000 });
     }
   };
 
   if (!product) {
-    return null; // or some loading indicator
+    return null;
   }
 
   return (
@@ -123,8 +107,6 @@ export function DialogEditProducts({
               className="col-span-3"
             />
           </div>
-          {error && <p className="text-red-500">{error}</p>}
-          {success && <p className="text-green-500">{success}</p>}
           <DialogFooter>
             <Button type="submit">Save changes</Button>
           </DialogFooter>

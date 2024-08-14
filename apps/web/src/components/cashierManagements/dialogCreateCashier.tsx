@@ -1,4 +1,3 @@
-'use client';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -11,17 +10,16 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { TokenProps } from '@/types/types';
-import { useRouter } from 'next/navigation';
+import { DialogCreateCashierProps } from '@/types/types';
 import { FormEvent, useState } from 'react';
 import toast from 'react-hot-toast';
 
-
-export function DialogCreateCashier({ token }: TokenProps) {
+export function DialogCreateCashier({
+  token,
+  onCashierUpdated,
+}: DialogCreateCashierProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isOpen, setIsOpen] = useState(false);
-  const router = useRouter()
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -38,15 +36,15 @@ export function DialogCreateCashier({ token }: TokenProps) {
         },
       );
       if (response.ok) {
-        toast.success('Cashier Created');
-        window.location.reload()
+        toast.success('Cashier Created', { duration: 4000 });
       }
-    } catch (error: any) {
-      toast.error(error);
+      onCashierUpdated();
+    } catch (error) {
+      toast.error('Failed to Edit Cashier', { duration: 4000 });
     }
   };
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog>
       <DialogTrigger asChild>
         <Button variant="default">Add New Cashier</Button>
       </DialogTrigger>
