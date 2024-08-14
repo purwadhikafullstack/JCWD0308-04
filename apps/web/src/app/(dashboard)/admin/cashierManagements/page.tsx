@@ -1,14 +1,15 @@
-'use client';
-import React, { useEffect, useState } from 'react';
-import { Avatar, AvatarImage } from '@/components/ui/avatar';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from '@/components/ui/card';
-import { getCashier, deleteCashier } from '@/lib/fetch';
+'use client'
+import React, { useEffect } from 'react';
+import { toast } from 'react-hot-toast';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Cashier } from '@/types/types';
+import { getCashier, deleteCashier } from '@/lib/fetch';
+import Cookies from 'js-cookie';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { DialogCreateCashier } from '@/components/cashierManagements/dialogCreateCashier';
 import { DialogEditCashier } from '@/components/cashierManagements/dialogEditCashier';
-import { Cashier } from '@/types/types';
-import Cookies from 'js-cookie';
-import toast from 'react-hot-toast';
+import { Avatar, AvatarImage } from '@radix-ui/react-avatar';
 
 export default function CashierManagements() {
   const [cashiers, setCashiers] = useState<Cashier[]>([]);
@@ -27,19 +28,47 @@ export default function CashierManagements() {
   }, [token]);
 
   const handleDelete = async (cashierId: number) => {
-    try {
-      const success = await deleteCashier(cashierId, token);
-      if (success) {
-        setCashiers(cashiers.filter((cashier) => cashier.id !== cashierId));
+    const confirmDelete = () => {
+      try {
+        deleteCashier(cashierId, token)
+          .then((success) => {
+            if (success) {
+              setCashiers(cashiers.filter((cashier) => cashier.id !== cashierId));
+              toast.success('Cashier Deleted');
+              handleCashierUpdated();
+            }
+          });
+      } catch (error) {
+        toast.error('Error deleting cashier');
+        console.error('Error deleting cashier', error);
       }
-      toast('Cashier Deleted', {duration: 4000})
-      handleCasierUpdated()
-    } catch (error) {
-      console.error('Error deleting cashier', error);
-    }
+    };
+
+    toast((t) => (
+      <div>
+        <p>Are you sure you want to delete this cashier?</p>
+        <div className="mt-4 flex justify-end space-x-2">
+          <Button
+            variant="outline"
+            onClick={() => toast.dismiss(t.id)}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={() => {
+              confirmDelete();
+              toast.dismiss(t.id);
+            }}
+          >
+            Delete
+          </Button>
+        </div>
+      </div>
+    ));
   };
-  
-  const handleCasierUpdated = async () => {
+
+  const handleCashierUpdated = async () => {
     try {
       const data = await getCashier(token);
       setCashiers(data);
@@ -50,6 +79,7 @@ export default function CashierManagements() {
 
   return (
     <div className="grid gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 lg:grid-cols-1 xl:grid-cols-1 mx-4 lg:mx-20">
+      {/* Card for creating cashiers */}
       <Card className="sm:col-span-2">
         <CardHeader className="pb-3">
           <CardTitle>Cashier Managements</CardTitle>
@@ -58,9 +88,11 @@ export default function CashierManagements() {
           </CardDescription>
         </CardHeader>
         <CardFooter>
-          <DialogCreateCashier onCashierUpdated={handleCasierUpdated} token={token} />
+          <DialogCreateCashier onCashierUpdated={handleCashierUpdated} token={token} />
         </CardFooter>
       </Card>
+
+      {/* Card for displaying cashiers */}
       <Card className="grid pt-6 sm:col-span-2">
         <CardContent className="grid gap-8">
           {cashiers.length > 0 ? (
@@ -77,7 +109,7 @@ export default function CashierManagements() {
                   <DialogEditCashier
                     cashier={cashier}
                     token={token}
-                    onCashierUpdated={handleCasierUpdated}
+                    onCashierUpdated={handleCashierUpdated}
                   />
                 </div>
                 <div className="mt-2 sm:mt-0">

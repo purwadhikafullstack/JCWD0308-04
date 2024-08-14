@@ -1,6 +1,5 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import {
   Card,
   CardContent,
@@ -12,17 +11,13 @@ import { Transaction } from '@/types/transactionTypes';
 import Cookies from 'js-cookie';
 import { formatDateTime, formatToIDR } from '@/lib/utils';
 import RecentDetail from '@/components/shift/recentDetail';
-import { DialogStartShift } from '@/components/shift/dialogStartShift';
-import { DialogEndShift } from '@/components/shift/dialogEndShift';
 
 export default function Activity() {
   const [cashierId, setCashierId] = useState<string | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedTransaction, setSelectedTransaction] =
-    useState<Transaction | null>(null);
-  const router = useRouter();
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const token = Cookies.get('token');
 
   useEffect(() => {
