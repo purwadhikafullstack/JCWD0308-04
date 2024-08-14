@@ -37,7 +37,6 @@ export interface CardDetailProps {
   setSelectedProducts: (product: Product[]) => void;
 }
 
-
 // Cashier
 export interface CashierProps {
   cashiers: Cashier[];
@@ -53,13 +52,7 @@ export interface DialogCreateCashierProps {
   onCashierUpdated: () => void;
 }
 
-
-
-
-
-
 // Report Transaction
-
 export interface Payment {
   id: string;
   method: string;

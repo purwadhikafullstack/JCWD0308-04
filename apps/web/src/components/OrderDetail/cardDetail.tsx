@@ -26,7 +26,6 @@ export default function CardDetail({
     throw new Error('UserContext is undefined. Ensure it is used within a UserContextProvider.');
   }
   const { shiftId } = context;
-
   const handleQuantityChange = (productId: number, quantity: number) => {
     const idx = selectedProducts.findIndex((p) => p.id === productId);
     if (idx !== -1) {
@@ -38,14 +37,11 @@ export default function CardDetail({
       setQuantity(quantity);
     }
   };
-
   const totalAmount = selectedProducts.reduce(
     (total, product) => total + product.price * product.quantity,
     0,
   );
-
   const change = amountPaid - totalAmount;
-
   const handleSubmit = async () => {
     if (!shiftId) {
       toast.error('Shift doesn\'t start. Please start your shift.', { duration: 4000 });

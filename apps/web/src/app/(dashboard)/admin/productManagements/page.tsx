@@ -1,8 +1,8 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from '@/components/ui/table';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { formatToIDR } from '@/lib/utils';
 import { deleteProduct, getProduct } from '@/lib/fetch';
 import { Button } from '@/components/ui/button';
@@ -29,16 +29,44 @@ export default function ProductManagements() {
   }, [token]);
 
   const handleDelete = async (productId: number) => {
-    try {
-      const success = await deleteProduct(productId, token);
-      if (success) {
-        setProducts(products.filter((product) => product.id !== productId));
+    const confirmDelete = () => {
+      try {
+        deleteProduct(productId, token)
+          .then((success) => {
+            if (success) {
+              setProducts(products.filter((product) => product.id !== productId));
+              toast.success('Product Deleted');
+              handleProductUpdated();
+            }
+          });
+      } catch (error: any) {
+        toast.error('Error deleting product');
+        console.error('Error deleting product', error);
       }
-      toast.success('Product Deleted')
-      handleProductUpdated()
-    } catch (error : any) {
-      toast.error(error)
-    }
+    };
+
+    toast((t) => (
+      <div>
+        <p>Are you sure you want to delete this product?</p>
+        <div className="mt-4 flex justify-end space-x-2">
+          <Button
+            variant="outline"
+            onClick={() => toast.dismiss(t.id)}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={() => {
+              confirmDelete();
+              toast.dismiss(t.id);
+            }}
+          >
+            Delete
+          </Button>
+        </div>
+      </div>
+    ));
   };
 
   const handleProductUpdated = async () => {

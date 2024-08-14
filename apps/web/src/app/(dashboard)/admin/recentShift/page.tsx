@@ -15,14 +15,13 @@ import CardReportSales from '@/components/recentShift/cardReportSales';
 
 export default function RecentShift() {
   const [shiftReport, setShiftReport] = useState<ShiftReport[]>([]);
-  const [selectedRecentShift, setSelectedRecentShift] =
-    useState<ShiftReport | null>(null);
+  const [selectedRecentShift, setSelectedRecentShift] = useState<ShiftReport | null>(null);
   const [error, setError] = useState<string | null>(null);
   const token = Cookies.get('token');
 
   useEffect(() => {
     const fetchReport = async () => {
-      const date = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+      const date = new Date().toISOString().split('T')[0]; 
       try {
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_BASE_API_URL}admin/consolidated-daily-sales-report?date=${date}`,
