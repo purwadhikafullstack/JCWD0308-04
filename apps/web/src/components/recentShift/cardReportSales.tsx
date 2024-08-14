@@ -1,12 +1,12 @@
 'use client'
 import { useEffect, useState } from 'react';
-import Cookies from 'js-cookie'
+import Cookies from 'js-cookie';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { formatToIDR } from '@/lib/utils';
 
 export default function CardReportSales() {
-    const [totalSales, setTotalSales] = useState<number | null>(null);
-    const [totalCashSales, setTotalCashSales] = useState<number | null>(null);
+    const [netSales, setNetSales] = useState<number | null>(null);
+    const [netCashSales, setNetCashSales] = useState<number | null>(null);
     const [totalCardSales, setTotalCardSales] = useState<number | null>(null);
 
     useEffect(() => {
@@ -30,9 +30,10 @@ export default function CardReportSales() {
                 const cashSalesData = await cashSalesRes.json();
                 const cardSalesData = await cardSalesRes.json();
 
-                setTotalSales(totalSalesData.totalSales);
-                setTotalCashSales(cashSalesData.totalCashSales);
-                setTotalCardSales(cardSalesData.totalCardSales);
+                // Update state with net sales values
+                setNetSales(totalSalesData.netSales);
+                setNetCashSales(cashSalesData.netSales);
+                setTotalCardSales(cardSalesData.totalCardSales); // Note: This is not net sales, just total card sales
             } catch (error) {
                 console.error('Error fetching sales data:', error);
             }
@@ -47,7 +48,7 @@ export default function CardReportSales() {
                 <CardHeader className="pb-2">
                     <CardDescription>Total Sales</CardDescription>
                     <CardTitle className="text-4xl">
-                        {totalSales !== null ? formatToIDR(totalSales) : 'Loading...'}
+                        {netSales !== null ? formatToIDR(netSales) : 'Loading...'}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -75,7 +76,7 @@ export default function CardReportSales() {
                 <CardHeader className="pb-2">
                     <CardDescription>Total Cash Payment</CardDescription>
                     <CardTitle className="text-4xl">
-                        {totalCashSales !== null ? formatToIDR(totalCashSales) : 'Loading...'}
+                        {netCashSales !== null ? formatToIDR(netCashSales) : 'Loading...'}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>

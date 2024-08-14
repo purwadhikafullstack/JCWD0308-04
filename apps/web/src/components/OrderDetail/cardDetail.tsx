@@ -15,7 +15,6 @@ export default function CardDetail({
   selectedProducts,
   setSelectedProducts,
 }: CardDetailProps) {
-  const [quantity, setQuantity] = useState(1);
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [amountPaid, setAmountPaid] = useState<number>(0);
   const [cardNumber, setCardNumber] = useState<string>('');
@@ -26,22 +25,23 @@ export default function CardDetail({
     throw new Error('UserContext is undefined. Ensure it is used within a UserContextProvider.');
   }
   const { shiftId } = context;
+
   const handleQuantityChange = (productId: number, quantity: number) => {
-    const idx = selectedProducts.findIndex((p) => p.id === productId);
-    if (idx !== -1) {
-      selectedProducts[idx].quantity = Math.min(
-        Math.max(quantity, 1),
-        selectedProducts[idx].stock,
-      );
-      setSelectedProducts([...selectedProducts]);
-      setQuantity(quantity);
-    }
+    const updatedProducts = selectedProducts.map((product) => 
+      product.id === productId
+        ? { ...product, quantity: Math.min(Math.max(quantity, 1), product.stock) }
+        : product
+    );
+    setSelectedProducts(updatedProducts);
   };
+
   const totalAmount = selectedProducts.reduce(
     (total, product) => total + product.price * product.quantity,
     0,
   );
+  
   const change = amountPaid - totalAmount;
+
   const handleSubmit = async () => {
     if (!shiftId) {
       toast.error('Shift doesn\'t start. Please start your shift.', { duration: 4000 });
@@ -55,9 +55,9 @@ export default function CardDetail({
       toast.error('Please enter the card number.', { duration: 4000 });
       return;
     }
-  
+
     setIsSubmitting(true);
-  
+
     const token = Cookies.get('token');
     try {
       const response = await fetch(
@@ -77,7 +77,7 @@ export default function CardDetail({
           }),
         }
       );
-  
+
       if (!response.ok) {
         toast.error('Failed to create transaction.');
       } else {
@@ -91,8 +91,6 @@ export default function CardDetail({
     }
     setIsSubmitting(false);
   };
-  
-  
 
   return (
     <Card className="overflow-hidden">
@@ -127,7 +125,7 @@ export default function CardDetail({
                       id={`quantity-${product.id}`}
                       type="number"
                       min="1"
-                      defaultValue={quantity}
+                      value={product.quantity}
                       onChange={(e) =>
                         handleQuantityChange(
                           product.id,
@@ -137,7 +135,7 @@ export default function CardDetail({
                     />
                   </span>
                 </span>
-                <span>{formatToIDR(product.price * quantity)}</span>
+                <span>{formatToIDR(product.price * product.quantity)}</span>
               </li>
             ))}
           </ul>
@@ -189,8 +187,8 @@ export default function CardDetail({
             )}
             <Input
               type="number"
-              defaultValue={amountPaid}
-              onChange={(e) => setAmountPaid(parseFloat(e.target.value) || 0)}
+              value={amountPaid}
+              onChange={(e) => setAmountPaid(parseFloat(e.target.value))}
               placeholder="Amount Paid"
             />
           </div>

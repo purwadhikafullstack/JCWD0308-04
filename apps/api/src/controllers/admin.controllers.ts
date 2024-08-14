@@ -82,10 +82,6 @@ export class AdminControllers {
       if (!cashier) {
         return res.status(404).json({ error: 'Cashier not found' });
       }
-      // const isPasswordValid = await compare(currentPassword, cashier.password);
-      // if (!isPasswordValid) {
-      //     return res.status(401).json({ error: "Current password is incorrect" });
-      // }
       const hashedPassword = await hash(newPassword, 8);
       const updatedCashier = await prisma.cashier.update({
         where: { id: parseInt(id) },
@@ -322,26 +318,38 @@ export class AdminControllers {
       const totalSales = await prisma.payment.aggregate({
         _sum: {
           amount: true,
+          change: true,
         },
       });
-
-      res.status(200).json({ totalSales: totalSales._sum.amount || 0 });
+  
+      const totalAmount = totalSales._sum.amount ?? 0;
+      const totalChange = totalSales._sum.change ?? 0;
+  
+      const netSales = totalAmount - totalChange;
+  
+      res.status(200).json({ netSales });
     } catch (error) {
       console.error('Error fetching total sales:', error);
       res.status(500).json({ error: 'Failed to fetch total sales' });
     }
   }
+  
   async getTotalCashSales(req: Request, res: Response) {
     try {
       const totalCashSales = await prisma.payment.aggregate({
         _sum: {
           amount: true,
+          change: true
         },
         where: {
           method: 'cash',
         },
       });
-      res.status(200).json({ totalCashSales: totalCashSales._sum.amount || 0 });
+      const totalAmount = totalCashSales._sum.amount ?? 0;
+      const totalChange = totalCashSales._sum.change ?? 0;
+  
+      const netSales = totalAmount - totalChange;
+      res.status(200).json({ netSales});
     } catch (error) {
       console.error('Error fetching total cash sales:', error);
       res.status(500).json({ error: 'Failed to fetch total cash sales' });

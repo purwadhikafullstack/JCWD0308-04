@@ -15,7 +15,7 @@ export default function RecentDetail({ shiftReport }: ShiftReportProps) {
     (acc, transaction) => {
       transaction.paymentDetails.forEach((payment) => {
         if (payment.method === 'cash') {
-          acc.cash += payment.amount;
+          acc.cash += payment.amount - payment.change;
         } else if (payment.method === 'card') {
           acc.card += payment.amount;
         }
@@ -70,13 +70,13 @@ export default function RecentDetail({ shiftReport }: ShiftReportProps) {
                 className="flex items-center justify-between"
               >
                 <span className="text-muted-foreground">
-                  {transaction.transactionProducts[0].product.name} x {' '}
+                  {transaction.transactionProducts[0].product.name} x 
                   {transaction.transactionProducts[0].quantity}
                 </span>
                 <span>
-                  {formatToIDR(
-                    transaction.paymentDetails.reduce(
-                      (sum, payment) => sum + payment.amount,
+                {formatToIDR(
+                    transaction.transactionProducts.reduce(
+                      (sum, product) => sum + transaction.transactionProducts[0].product.price * product.quantity,
                       0,
                     ),
                   )}
