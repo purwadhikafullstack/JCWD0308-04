@@ -44,8 +44,8 @@ export function DialogCreateProduct({
         toast.success('Product Created', { duration: 4000 });
       }
       onProductUpdated();
-    } catch (error: any) {
-      toast.error(error, {duration: 4000});
+    } catch (error) {
+      toast.error('Failed to create product', { duration: 4000 });
     }
   };
 
